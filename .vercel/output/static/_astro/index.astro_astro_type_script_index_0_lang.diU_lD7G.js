@@ -1,1 +1,0 @@
-import{t as e}from"./gsap.Bi_c5vh2.js";import{t}from"./ScrollTrigger.BTGKJApg.js";e.registerPlugin(t),e.to(`.header-anim`,{opacity:1,y:0,duration:1,ease:`power3.out`}),e.to(`.service-card`,{scrollTrigger:{trigger:`.cards-container`,start:`top 85%`},opacity:1,y:0,stagger:.1,duration:.8,ease:`power3.out`});

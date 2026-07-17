@@ -1,1 +1,0 @@
-import{t as e}from"./gsap.Bi_c5vh2.js";import{t}from"./ScrollTrigger.BTGKJApg.js";e.registerPlugin(t),e.to(`.faq-item`,{scrollTrigger:{trigger:`.faq-item`,start:`top 90%`},opacity:1,y:0,stagger:.1,duration:.6,ease:`power2.out`});

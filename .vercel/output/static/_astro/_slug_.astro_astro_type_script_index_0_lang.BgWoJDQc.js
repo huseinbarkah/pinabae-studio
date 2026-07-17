@@ -1,1 +1,0 @@
-import{t as e}from"./gsap.Bi_c5vh2.js";e.to(`.header-anim`,{opacity:1,y:0,duration:.8,ease:`power2.out`}),e.to(`.content-anim`,{opacity:1,y:0,duration:.8,ease:`power2.out`,delay:.2,stagger:.2});
