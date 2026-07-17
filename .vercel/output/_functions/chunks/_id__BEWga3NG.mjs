@@ -3,7 +3,7 @@ import { _ as addAttribute, d as renderTemplate, h as maybeRenderHead, i as rend
 import { t as createComponent } from "./compiler_C9WHqJJs.mjs";
 import { n as templateExit, t as templateEnter } from "./template-depth_t6cycGNy.mjs";
 import { t as $$AdminLayout } from "./AdminLayout_BXmOd-gS.mjs";
-import { t as supabase } from "./supabase_Cm4yaabg.mjs";
+import { t as supabase } from "./supabase_DM77KPLp.mjs";
 //#region src/pages/admin/blog/edit/[id].astro
 var _id__exports = /* @__PURE__ */ __exportAll({
 	default: () => $$Id,

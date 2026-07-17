@@ -16,6 +16,17 @@ export const supabase = createClient(
       headers: {
         'apikey': supabaseAnonKey || '',
       },
+      fetch: async (url, options) => {
+        try {
+          return await fetch(url, options);
+        } catch (e) {
+          console.error("Supabase fetch error:", e);
+          return new Response(JSON.stringify({ error: "Fetch failed", details: e }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+      },
     },
   }
 );

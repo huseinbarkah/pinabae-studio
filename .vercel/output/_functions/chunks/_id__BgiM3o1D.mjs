@@ -2,7 +2,7 @@ import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { _ as addAttribute, d as renderTemplate, h as maybeRenderHead, i as renderComponent, v as defineScriptVars, w as createAstro } from "./server_DZ0hTl6C.mjs";
 import { t as createComponent } from "./compiler_C9WHqJJs.mjs";
 import { t as $$AdminLayout } from "./AdminLayout_BXmOd-gS.mjs";
-import { t as supabase } from "./supabase_Cm4yaabg.mjs";
+import { t as supabase } from "./supabase_DM77KPLp.mjs";
 //#region src/pages/admin/services/edit/[id].astro
 var _id__exports = /* @__PURE__ */ __exportAll({
 	default: () => $$Id,

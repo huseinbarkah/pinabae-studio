@@ -1,5 +1,5 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
-import { t as supabase } from "./supabase_Cm4yaabg.mjs";
+import { t as supabase } from "./supabase_DM77KPLp.mjs";
 //#region src/pages/sitemap.xml.ts
 var sitemap_xml_exports = /* @__PURE__ */ __exportAll({
 	GET: () => GET,
