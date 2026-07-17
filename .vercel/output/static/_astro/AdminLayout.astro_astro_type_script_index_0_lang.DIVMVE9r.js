@@ -1,1 +1,0 @@
-import{t as e}from"./supabase.DgR7_tVi.js";e.auth.getSession().then(({data:{session:e}})=>{e?document.body.classList.remove(`hidden`):window.location.href=`/admin/login`}),e.auth.onAuthStateChange((e,t)=>{t||(window.location.href=`/admin/login`)});

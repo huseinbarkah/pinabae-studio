@@ -1,1 +1,0 @@
-import{t as e}from"./supabase.DgR7_tVi.js";var t=document.getElementById(`logoutBtn`);t&&t.addEventListener(`click`,async()=>{await e.auth.signOut(),window.location.href=`/admin/login`});

@@ -1,0 +1,117 @@
+import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
+import { _ as addAttribute, d as renderTemplate, h as maybeRenderHead, i as renderComponent, v as defineScriptVars, w as createAstro } from "./server_DZ0hTl6C.mjs";
+import { t as createComponent } from "./compiler_C9WHqJJs.mjs";
+import { t as $$AdminLayout } from "./AdminLayout_BXmOd-gS.mjs";
+import { t as supabase } from "./supabase_Cm4yaabg.mjs";
+//#region src/pages/admin/portfolio/edit/[id].astro
+var _id__exports = /* @__PURE__ */ __exportAll({
+	default: () => $$Id,
+	file: () => $$file,
+	prerender: () => false,
+	url: () => $$url
+});
+createAstro("https://astro.build");
+var $$Id = createComponent(async ($$result, $$props, $$slots) => {
+	const Astro = $$result.createAstro($$props, $$slots);
+	Astro.self = $$Id;
+	const { id } = Astro.params;
+	let initialData = null;
+	try {
+		const { data } = await supabase.from("portfolio").select("*").eq("id", id).single();
+		if (data) initialData = data;
+	} catch (e) {
+		console.error(e);
+	}
+	if (!initialData) return Astro.redirect("/admin/portfolio");
+	return renderTemplate`${renderComponent($$result, "AdminLayout", $$AdminLayout, { "title": "Edit Portfolio | Admin Pinabae" }, { "default": ($$result) => renderTemplate`${maybeRenderHead($$result)}<div class="mb-8 flex justify-between items-center"><div><h1 class="text-2xl font-bold text-dark">Edit Portfolio</h1><p class="text-text">Perbarui detail proyek website.</p></div><a href="/admin/portfolio" class="px-4 py-2 bg-gray-100 text-dark rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>Batal</a></div><form${addAttribute(`editPortfolioData(${JSON.stringify(initialData)})`, "x-data")} @submit.prevent="updatePortfolio" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12" id="editor-form"><!-- Main Content Area --><div class="lg:col-span-2 space-y-6"><div class="bg-white p-6 rounded-xl border border-border shadow-sm"><div class="mb-6"><label class="block text-sm font-bold text-dark mb-2">Nama Proyek / Judul <span class="text-red-500">*</span></label><input type="text" x-model="item.title" @input="generateSlug" class="w-full px-4 py-3 text-lg font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" required></div><div class="mb-6"><label class="block text-sm font-bold text-dark mb-2">Nama Klien / Perusahaan</label><input type="text" x-model="item.client_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"></div><div class="mb-6"><label class="block text-sm font-bold text-dark mb-2">Deskripsi Proyek <span class="text-red-500">*</span></label><textarea x-model="item.description" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" required></textarea></div></div></div><!-- Sidebar --><div class="space-y-6"><div class="bg-white p-6 rounded-xl border border-border shadow-sm"><h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Simpan</h2><button type="submit" class="w-full py-3 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors flex justify-center items-center gap-2 shadow-sm shadow-orange-500/20" :disabled="submitting"><span x-show="!submitting">Perbarui Portfolio</span><span x-show="submitting" style="display: none;"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span></button></div><div class="bg-white p-6 rounded-xl border border-border shadow-sm"><h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Gambar Preview</h2><div x-show="!item.image_url" class="aspect-[4/3] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors" @click="$refs.fileInput.click()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 mb-2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg><span class="text-sm font-medium text-primary">Upload Gambar</span></div><div x-show="item.image_url" class="relative group aspect-[4/3]" style="display: none;"><img :src="item.image_url" class="w-full h-full object-cover rounded-lg border border-gray-200"><button type="button" @click="item.image_url = ''" class="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><input type="file" x-ref="fileInput" class="hidden" accept="image/*" @change="uploadImage"><div x-show="uploadingImage" class="mt-2 text-sm text-primary flex items-center gap-2" style="display: none;"><svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div></div><div class="bg-white p-6 rounded-xl border border-border shadow-sm"><h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Slug URL <span class="text-red-500">*</span></h2><input type="text" x-model="item.slug" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-sm bg-gray-50" required></div></div></form>` })}<script>(function(){${defineScriptVars({ itemId: id })}
+  import { supabase } from '../../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    window.Alpine.data('editPortfolioData', (initialData) => ({
+      submitting: false,
+      uploadingImage: false,
+      item: initialData || {
+        title: '',
+        slug: '',
+        client_name: '',
+        description: '',
+        image_url: ''
+      },
+
+      async init() {
+      },
+
+      generateSlug() {
+        this.item.slug = this.item.title
+          .toLowerCase()
+          .replace(/[^\\w\\s-]/g, '')
+          .replace(/[\\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      },
+
+      async uploadImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        this.uploadingImage = true;
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('folder', 'portfolio');
+
+          const res = await fetch('/api/upload', { method: 'POST', body: formData });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Upload failed');
+
+          this.item.image_url = result.url;
+        } catch (error: any) {
+          console.error('Error uploading image:', error);
+          alert('Gagal mengunggah gambar. Pesan: ' + (error.message || ''));
+        } finally {
+          this.uploadingImage = false;
+          event.target.value = '';
+        }
+      },
+
+      async updatePortfolio() {
+        if (!this.item.title || !this.item.slug || !this.item.description) {
+          alert('Mohon isi field yang wajib!');
+          return;
+        }
+
+        this.submitting = true;
+        try {
+          const { error } = await supabase
+            .from('portfolio')
+            .update(this.item)
+            .eq('id', itemId);
+
+          if (error) {
+            if (error.code === '23505') {
+              alert('Slug sudah digunakan.');
+            } else {
+              throw error;
+            }
+            return;
+          }
+
+          alert('Portfolio berhasil diperbarui!');
+          window.location.href = '/admin/portfolio';
+        } catch (error) {
+          console.error('Error updating portfolio:', error);
+          alert('Gagal memperbarui portfolio.');
+        } finally {
+          this.submitting = false;
+        }
+      }
+    }));
+  });
+})();<\/script>`;
+}, "D:/Pinabae-Studio/src/pages/admin/portfolio/edit/[id].astro", void 0);
+var $$file = "D:/Pinabae-Studio/src/pages/admin/portfolio/edit/[id].astro";
+var $$url = "/admin/portfolio/edit/[id]";
+//#endregion
+//#region \0virtual:astro:page:src/pages/admin/portfolio/edit/[id]@_@astro
+var page = () => _id__exports;
+//#endregion
+export { page };
