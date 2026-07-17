@@ -5,7 +5,13 @@ import Footer from '../components/Footer.astro';
 import Section from '../components/ui/Section.astro';
 import { supabase } from '../lib/supabase';
 
-const { data: faqs } = await supabase.from('faqs').select('*').order('created_at', { ascending: true });
+let faqs = [];
+try {
+  const { data } = await supabase.from('faqs').select('*').order('created_at', { ascending: true });
+  if (data) faqs = data;
+} catch (error) {
+  console.error('Supabase error on faq:', error);
+}
 ---
 
 <Layout title="FAQ | Pinabae Studio" description="Pertanyaan yang sering diajukan mengenai layanan pembuatan website dari Pinabae Studio.">

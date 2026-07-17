@@ -7,16 +7,31 @@ import Button from '../components/ui/Button.astro';
 import Card from '../components/ui/Card.astro';
 import { supabase } from '../lib/supabase';
 
-// Fetch data from Supabase (gracefully handle if empty)
-const { data: services } = await supabase.from('services').select('*').limit(3);
-const { data: portfolio } = await supabase.from('portfolio').select('*').limit(4);
-const { data: faqs } = await supabase.from('faqs').select('*').limit(5);
-const { data: posts } = await supabase
-  .from('blog_posts')
-  .select('*, categories(name, slug)')
-  .eq('status', 'published')
-  .order('published_at', { ascending: false })
-  .limit(3);
+let services = [];
+let portfolio = [];
+let faqs = [];
+let posts = [];
+
+try {
+  const { data: servicesData } = await supabase.from('services').select('*').limit(3);
+  if (servicesData) services = servicesData;
+  
+  const { data: portfolioData } = await supabase.from('portfolio').select('*').limit(4);
+  if (portfolioData) portfolio = portfolioData;
+  
+  const { data: faqsData } = await supabase.from('faqs').select('*').limit(5);
+  if (faqsData) faqs = faqsData;
+  
+  const { data: postsData } = await supabase
+    .from('blog_posts')
+    .select('*, categories(name, slug)')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(3);
+  if (postsData) posts = postsData;
+} catch (error) {
+  console.error('Supabase fetch error in index.astro:', error);
+}
 ---
 
 <Layout title="Pinabae Studio | Jasa Pembuatan Website Profesional">

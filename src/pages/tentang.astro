@@ -5,10 +5,16 @@ import Footer from '../components/Footer.astro';
 import Section from '../components/ui/Section.astro';
 import { supabase } from '../lib/supabase';
 
-const { data: teamMembers } = await supabase
-  .from('team_members')
-  .select('*')
-  .order('created_at', { ascending: true });
+let teamMembers = [];
+try {
+  const { data } = await supabase
+    .from('team_members')
+    .select('*')
+    .order('order_index', { ascending: true });
+  if (data) teamMembers = data;
+} catch (error) {
+  console.error('Supabase error on team:', error);
+}
 ---
 
 <Layout title="Tentang Kami | Pinabae Studio" description="Pinabae Studio adalah digital agency yang berfokus pada pembuatan website berkualitas tinggi.">
