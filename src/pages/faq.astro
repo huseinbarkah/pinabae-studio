@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import Section from '../components/ui/Section.astro';
+import { supabase } from '../lib/supabase';
+
+const { data: faqs } = await supabase.from('faqs').select('*').order('created_at', { ascending: true });
+---
+
+<Layout title="FAQ | Pinabae Studio" description="Pertanyaan yang sering diajukan mengenai layanan pembuatan website dari Pinabae Studio.">
+  <Navbar />
+  
+  <main class="flex-grow pt-32">
+    <Section class="text-center pb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-dark mb-6">Pertanyaan Umum</h1>
+      <p class="text-lg text-text max-w-2xl mx-auto">Jawaban untuk beberapa pertanyaan yang paling sering ditanyakan oleh klien kami.</p>
+    </Section>
+
+    <Section background="gray" class="py-16">
+      <div class="max-w-3xl mx-auto space-y-6">
+        {faqs && faqs.length > 0 ? (
+          faqs.map((faq: any) => (
+            <div class="bg-white p-6 md:p-8 rounded-2xl border border-border shadow-sm">
+              <h3 class="text-xl font-bold text-dark mb-4">{faq.question}</h3>
+              <p class="text-text">{faq.answer}</p>
+            </div>
+          ))
+        ) : (
+          [
+            { q: "Berapa lama proses pembuatan website?", a: "Tergantung dari kompleksitas proyek. Untuk website company profile standar, biasanya membutuhkan waktu 1-2 minggu." },
+            { q: "Apakah saya bisa mengelola konten website sendiri nantinya?", a: "Tentu saja. Kami menyediakan sistem CMS yang sangat mudah digunakan meskipun Anda tidak memiliki latar belakang IT." },
+            { q: "Apakah website sudah termasuk hosting dan domain?", a: "Ya, paket pembuatan website kami biasanya sudah termasuk hosting premium dan domain (.com/.id) untuk tahun pertama." },
+            { q: "Bagaimana sistem pembayarannya?", a: "Sistem pembayaran kami biasanya dibagi menjadi 2 termin: 50% down payment sebelum proyek dimulai, dan 50% pelunasan setelah website selesai dan siap online." }
+          ].map((faq) => (
+            <div class="bg-white p-6 md:p-8 rounded-2xl border border-border shadow-sm faq-item opacity-0 translate-y-4">
+              <h3 class="text-xl font-bold text-dark mb-4">{faq.q}</h3>
+              <p class="text-text">{faq.a}</p>
+            </div>
+          ))
+        )}
+      </div>
+    </Section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.to('.faq-item', {
+    scrollTrigger: {
+      trigger: '.faq-item',
+      start: 'top 90%',
+    },
+    opacity: 1,
+    y: 0,
+    stagger: 0.1,
+    duration: 0.6,
+    ease: 'power2.out'
+  });
+</script>

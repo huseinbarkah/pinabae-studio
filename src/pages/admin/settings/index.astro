@@ -1,0 +1,165 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Pengaturan & SEO | Admin Pinabae">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-dark">Pengaturan & SEO</h1>
+    <p class="text-text">Atur informasi dasar website dan optimasi mesin pencari.</p>
+  </div>
+
+  <div id="initial-loading" class="p-12 text-center text-gray-400">
+    <svg class="animate-spin h-8 w-8 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    <p>Memuat pengaturan...</p>
+  </div>
+
+  <form x-data="settingsData()" @submit.prevent="saveSettings" class="space-y-8 pb-12" style="display: none;" id="settings-form">
+    
+    <!-- SEO & General Info -->
+    <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+      <div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 0 1 9-9"/></svg>
+        <h2 class="text-lg font-bold text-dark">Informasi SEO Website</h2>
+      </div>
+
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm font-bold text-dark mb-2">Judul Website Utama (Default Title)</label>
+          <input type="text" x-model="settings.site_title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" required placeholder="Contoh: Pinabae Studio | Jasa Website">
+          <p class="text-xs text-gray-500 mt-1">Akan ditampilkan di tab browser jika halaman tidak memiliki judul spesifik.</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-dark mb-2">Deskripsi Website (Meta Description)</label>
+          <textarea x-model="settings.site_description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" required placeholder="Tuliskan deskripsi singkat tentang layanan bisnis Anda."></textarea>
+          <p class="text-xs text-gray-500 mt-1">Deskripsi ini akan muncul di hasil pencarian Google di bawah judul halaman.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact & Social Media -->
+    <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+      <div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
+        <h2 class="text-lg font-bold text-dark">Kontak & Sosial Media</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-bold text-dark mb-2">Alamat Email</label>
+          <input type="email" x-model="settings.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="halo@pinabaestudio.com">
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-dark mb-2">Nomor WhatsApp</label>
+          <input type="text" x-model="settings.whatsapp" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="6281234567890">
+          <p class="text-xs text-gray-500 mt-1">Gunakan kode negara (62) tanpa spasi atau plus.</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-dark mb-2">Instagram Username / Link</label>
+          <input type="text" x-model="settings.instagram" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="@pinabaestudio">
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-dark mb-2">LinkedIn URL</label>
+          <input type="text" x-model="settings.linkedin" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="https://linkedin.com/company/pinabae">
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end pt-4">
+      <button type="submit" class="px-8 py-3 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors flex justify-center items-center gap-2 shadow-sm shadow-orange-500/20" :disabled="submitting">
+        <span x-show="!submitting">Simpan Pengaturan</span>
+        <span x-show="submitting" style="display: none;">
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          Menyimpan...
+        </span>
+      </button>
+    </div>
+  </form>
+</AdminLayout>
+
+<script>
+  import { supabase } from '../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    window.Alpine.data('settingsData', () => ({
+      submitting: false,
+      isNew: true,
+      settings: {
+        id: 1,
+        site_title: 'Pinabae Studio | Jasa Pembuatan Website Profesional',
+        site_description: 'Pinabae Studio membantu UMKM, startup, dan personal brand membangun kredibilitas melalui website modern, cepat, dan SEO Friendly.',
+        email: '',
+        whatsapp: '',
+        instagram: '',
+        linkedin: ''
+      },
+
+      async init() {
+        try {
+          const { data, error } = await supabase
+            .from('site_settings')
+            .select('*')
+            .eq('id', 1)
+            .single();
+
+          if (error && error.code !== 'PGRST116') { // PGRST116 is not found (0 rows)
+            // If table doesn't exist, it will throw 42P01.
+            // We just let it use the default values and create it on save.
+            console.log('Error checking settings', error);
+          }
+          
+          if (data) {
+            this.settings = { ...this.settings, ...data };
+            this.isNew = false;
+          }
+
+          document.getElementById('initial-loading').style.display = 'none';
+          document.getElementById('settings-form').style.display = 'block';
+        } catch (error) {
+          console.error('Error fetching settings:', error);
+          document.getElementById('initial-loading').innerHTML = '<p class="text-red-500">Tabel site_settings belum ada. Anda bisa klik Simpan untuk membuatnya secara otomatis jika Supabase mengizinkan.</p>';
+          document.getElementById('settings-form').style.display = 'block';
+        }
+      },
+
+      async saveSettings() {
+        this.submitting = true;
+        try {
+          let result;
+          
+          if (this.isNew) {
+            result = await supabase
+              .from('site_settings')
+              .insert([this.settings]);
+          } else {
+            result = await supabase
+              .from('site_settings')
+              .update(this.settings)
+              .eq('id', 1);
+          }
+
+          if (result.error) {
+            if (result.error.code === '42P01') {
+              alert('Tabel "site_settings" belum dibuat di Supabase. Silakan buat tabel dengan kolom: id, site_title, site_description, email, whatsapp, instagram, linkedin.');
+            } else {
+              throw result.error;
+            }
+            return;
+          }
+
+          this.isNew = false;
+          alert('Pengaturan berhasil disimpan!');
+        } catch (error) {
+          console.error('Error saving settings:', error);
+          alert('Gagal menyimpan pengaturan. Pesan error: ' + (error.message || JSON.stringify(error)));
+        } finally {
+          this.submitting = false;
+        }
+      }
+    }));
+  });
+</script>

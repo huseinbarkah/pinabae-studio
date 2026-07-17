@@ -1,0 +1,176 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Kelola Blog | Admin Pinabae">
+  <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-dark">Blog Artikel</h1>
+      <p class="text-text">Kelola semua artikel blog Anda dari sini.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/admin/blog/categories" class="px-4 py-2 bg-gray-100 text-dark rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg>
+        Kategori
+      </a>
+      <a href="/admin/blog/create" class="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors flex items-center gap-2 shadow-sm shadow-orange-500/20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+        Tulis Artikel
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-border shadow-sm overflow-hidden" x-data="blogData()">
+    <div class="p-4 border-b border-border flex justify-between items-center bg-gray-50">
+      <div class="relative w-64">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" x-model="searchQuery" @input="filterPosts" placeholder="Cari judul artikel..." class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none">
+      </div>
+      <button @click="loadPosts()" class="text-sm text-gray-500 hover:text-primary flex items-center gap-1 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{'animate-spin': loading}"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <div x-show="loading" class="p-12 text-center text-gray-400">
+      <svg class="animate-spin h-8 w-8 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+      <p>Memuat artikel...</p>
+    </div>
+
+    <div x-show="!loading && filteredPosts.length === 0" class="p-12 text-center text-gray-500" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-300"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+      <p class="text-lg font-medium text-dark mb-1">Tidak ada artikel ditemukan</p>
+      <p class="text-sm">Klik 'Tulis Artikel' untuk mulai membuat konten.</p>
+    </div>
+
+    <div class="overflow-x-auto" x-show="!loading && filteredPosts.length > 0" style="display: none;">
+      <table class="w-full text-left whitespace-nowrap">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Judul Artikel</th>
+            <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori</th>
+            <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+            <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <template x-for="post in filteredPosts" :key="post.id">
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4">
+                <div class="font-medium text-dark flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0">
+                    <template x-if="post.featured_image">
+                      <img :src="post.featured_image" alt="thumbnail" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!post.featured_image">
+                      <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                    </template>
+                  </div>
+                  <div class="truncate max-w-[200px] md:max-w-[300px]" x-text="post.title"></div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800" x-text="post.categories?.name || 'Tanpa Kategori'"></span>
+              </td>
+              <td class="px-6 py-4">
+                <span x-show="post.status === 'published'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Published
+                </span>
+                <span x-show="post.status !== 'published'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  Draft
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-500" x-text="formatDate(post.published_at || post.created_at)"></div>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <a :href="'/admin/blog/edit/' + post.id" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                  </a>
+                  <button @click="deletePost(post.id)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase } from '../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    window.Alpine.data('blogData', () => ({
+      posts: [],
+      filteredPosts: [],
+      searchQuery: '',
+      loading: true,
+
+      async init() {
+        await this.loadPosts();
+      },
+
+      async loadPosts() {
+        this.loading = true;
+        try {
+          const { data, error } = await supabase
+            .from('blog_posts')
+            .select('*, categories(name)')
+            .order('created_at', { ascending: false });
+            
+          if (error) throw error;
+          this.posts = data || [];
+          this.filterPosts();
+        } catch (error) {
+          console.error('Error fetching posts:', error);
+          alert('Gagal memuat artikel.');
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      filterPosts() {
+        if (!this.searchQuery) {
+          this.filteredPosts = this.posts;
+          return;
+        }
+        const query = this.searchQuery.toLowerCase();
+        this.filteredPosts = this.posts.filter(p => p.title.toLowerCase().includes(query));
+      },
+
+      async deletePost(id) {
+        if (!confirm('Apakah Anda yakin ingin menghapus artikel ini? Tindakan ini tidak dapat dibatalkan.')) return;
+        
+        try {
+          const { error } = await supabase
+            .from('blog_posts')
+            .delete()
+            .eq('id', id);
+            
+          if (error) throw error;
+          
+          this.posts = this.posts.filter(p => p.id !== id);
+          this.filterPosts();
+        } catch (error) {
+          console.error('Error deleting post:', error);
+          alert('Gagal menghapus artikel.');
+        }
+      },
+
+      formatDate(dateString) {
+        if (!dateString) return '-';
+        const options: Intl.DateTimeFormatOptions = { 
+          year: 'numeric', month: 'short', day: 'numeric' 
+        };
+        return new Date(dateString).toLocaleDateString('id-ID', options);
+      }
+    }));
+  });
+</script>

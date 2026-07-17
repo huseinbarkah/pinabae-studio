@@ -1,0 +1,73 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import Section from '../../components/ui/Section.astro';
+import { supabase } from '../../lib/supabase';
+
+const { slug } = Astro.params;
+
+const { data: post, error } = await supabase
+  .from('blog_posts')
+  .select('*, categories(name, slug)')
+  .eq('slug', slug)
+  .eq('status', 'published')
+  .single();
+
+if (error || !post) {
+  return Astro.redirect('/404');
+}
+---
+
+<Layout title={`${post.seo_title || post.title} | Blog Pinabae Studio`} description={post.seo_description || post.excerpt}>
+  <Navbar />
+  
+  <main class="flex-grow pt-32">
+    <article>
+      <Section class="pb-10">
+        <div class="max-w-3xl mx-auto text-center">
+          <a href="/blog" class="text-gray-500 hover:text-primary mb-8 inline-flex items-center gap-2 text-sm font-medium transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Kembali ke Blog
+          </a>
+          
+          <div class="flex items-center justify-center gap-3 text-sm font-semibold text-gray-500 uppercase tracking-wider mb-6 header-anim opacity-0 translate-y-4">
+            {post.categories && <span class="text-primary">{post.categories.name}</span>}
+            {post.published_at && (
+              <>
+                <span>&bull;</span>
+                <span>{new Date(post.published_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </>
+            )}
+          </div>
+          
+          <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold text-dark mb-10 leading-tight header-anim opacity-0 translate-y-4 text-balance">
+            {post.title}
+          </h1>
+          
+          
+        </div>
+        
+        {post.featured_image && (
+          <div class="max-w-5xl mx-auto aspect-video rounded-3xl overflow-hidden shadow-xl mb-16 header-anim opacity-0 translate-y-8">
+            <img src={post.featured_image} alt={post.title} class="w-full h-full object-cover" />
+          </div>
+        )}
+        
+        <div class="max-w-3xl mx-auto prose prose-lg prose-orange text-text content-anim opacity-0 translate-y-8" set:html={post.content}>
+        </div>
+      </Section>
+    </article>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  import gsap from 'gsap';
+  
+  gsap.to('.header-anim', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', stagger: 0.1 });
+  gsap.to('.content-anim', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.4 });
+</script>

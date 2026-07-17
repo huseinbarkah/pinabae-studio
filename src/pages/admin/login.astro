@@ -1,0 +1,79 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Input from '../../components/ui/Input.astro';
+import Button from '../../components/ui/Button.astro';
+---
+
+<Layout title="Login Admin | Pinabae Studio">
+  <div class="min-h-screen bg-section flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="flex justify-center mb-6">
+        <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-2xl">
+          P
+        </div>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-dark">
+        Masuk ke Dashboard
+      </h2>
+      <p class="mt-2 text-center text-sm text-text">
+        Atur konten website Anda dengan mudah.
+      </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow-sm border border-border sm:rounded-2xl sm:px-10">
+        <div id="error-message" class="hidden p-4 mb-6 bg-red-50 text-red-600 text-sm rounded-xl"></div>
+        
+        <form id="login-form" class="space-y-6">
+          <Input id="email" name="email" type="email" label="Alamat Email" required={true} />
+          <Input id="password" name="password" type="password" label="Password" required={true} />
+          
+          <div>
+            <Button type="submit" class="w-full">
+              Masuk
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  const loginForm = document.getElementById('login-form');
+  const errorDiv = document.getElementById('error-message');
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = (document.getElementById('email') as HTMLInputElement).value;
+      const password = (document.getElementById('password') as HTMLInputElement).value;
+      
+      if (errorDiv) {
+        errorDiv.classList.add('hidden');
+        errorDiv.textContent = '';
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        if (errorDiv) {
+          errorDiv.textContent = error.message || 'Login gagal. Periksa email dan password Anda.';
+          errorDiv.classList.remove('hidden');
+        }
+      } else {
+        // Untuk tahap development/testing, kita lewati pengecekan tabel user_roles
+        // Jika ke depannya website ini akan live dan ada banyak user, Anda bisa mengaktifkannya lagi.
+        window.location.href = '/admin';
+      }
+    });
+  }
+</script>

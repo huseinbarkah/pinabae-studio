@@ -1,0 +1,88 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Card from '../../components/ui/Card.astro';
+---
+
+<AdminLayout title="Dashboard | Admin Pinabae">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-dark">Dashboard</h1>
+    <p class="text-text">Selamat datang di panel admin Pinabae Studio.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <Card class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Total Blog</p>
+        <p class="text-2xl font-bold text-dark" id="stat-blog">-</p>
+      </div>
+    </Card>
+
+    <Card class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Portfolio</p>
+        <p class="text-2xl font-bold text-dark" id="stat-portfolio">-</p>
+      </div>
+    </Card>
+
+    <Card class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Pesan Masuk</p>
+        <p class="text-2xl font-bold text-dark" id="stat-messages">-</p>
+      </div>
+    </Card>
+
+    <Card class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Layanan</p>
+        <p class="text-2xl font-bold text-dark" id="stat-services">-</p>
+      </div>
+    </Card>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  async function loadStats() {
+    try {
+      const [blog, portfolio, messages, services] = await Promise.all([
+        supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
+        supabase.from('portfolio').select('*', { count: 'exact', head: true }),
+        supabase.from('messages').select('*', { count: 'exact', head: true }),
+        supabase.from('services').select('*', { count: 'exact', head: true }),
+      ]);
+
+      const statBlog = document.getElementById('stat-blog');
+      const statPortfolio = document.getElementById('stat-portfolio');
+      const statMessages = document.getElementById('stat-messages');
+      const statServices = document.getElementById('stat-services');
+
+      if (statBlog) statBlog.textContent = blog.count?.toString() || '0';
+      if (statPortfolio) statPortfolio.textContent = portfolio.count?.toString() || '0';
+      if (statMessages) statMessages.textContent = messages.count?.toString() || '0';
+      if (statServices) statServices.textContent = services.count?.toString() || '0';
+    } catch (e) {
+      console.error('Error loading stats:', e);
+    }
+  }
+
+  // Load stats once auth is ready
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      loadStats();
+    }
+  });
+</script>

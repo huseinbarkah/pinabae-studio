@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* Pinabae Studio Theme Variables */
+@theme {
+  --color-primary: #F57C00;
+  --color-secondary: #FF9800;
+  --color-dark: #111827;
+  --color-text: #374151;
+  --color-background: #FFFFFF;
+  --color-section: #F8FAFC;
+  --color-border: #E5E7EB;
+  
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  
+  --container-max-width: 1280px;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-text font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-dark font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

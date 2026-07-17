@@ -1,0 +1,55 @@
+---
+interface Props {
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  name: string;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  class?: string;
+  textarea?: boolean;
+  rows?: number;
+}
+
+const { 
+  type = 'text', 
+  name, 
+  id = name, 
+  label, 
+  placeholder, 
+  required = false, 
+  class: className = '',
+  textarea = false,
+  rows = 4
+} = Astro.props;
+
+const baseInputStyles = "w-full px-4 py-3 rounded-xl border border-border bg-white text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed";
+---
+
+<div class={`flex flex-col gap-2 ${className}`}>
+  {label && (
+    <label for={id} class="text-sm font-medium text-dark">
+      {label} {required && <span class="text-red-500">*</span>}
+    </label>
+  )}
+  
+  {textarea ? (
+    <textarea
+      id={id}
+      name={name}
+      rows={rows}
+      placeholder={placeholder}
+      required={required}
+      class={baseInputStyles}
+    ></textarea>
+  ) : (
+    <input
+      type={type}
+      id={id}
+      name={name}
+      placeholder={placeholder}
+      required={required}
+      class={baseInputStyles}
+    />
+  )}
+</div>

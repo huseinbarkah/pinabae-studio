@@ -1,0 +1,1 @@
+import{t as e}from"./gsap.Bi_c5vh2.js";import{t}from"./ScrollTrigger.BTGKJApg.js";e.registerPlugin(t),e.to(`.header-anim`,{opacity:1,y:0,duration:1,ease:`power3.out`}),e.to(`.portfolio-card`,{scrollTrigger:{trigger:`.portfolio-card`,start:`top 85%`},opacity:1,y:0,stagger:.15,duration:.8,ease:`power2.out`});

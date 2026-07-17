@@ -1,0 +1,329 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Tulis Artikel | Admin Pinabae">
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-dark">Tulis Artikel Baru</h1>
+      <p class="text-text">Buat konten menarik untuk blog Anda.</p>
+    </div>
+    <a href="/admin/blog" class="px-4 py-2 bg-gray-100 text-dark rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Batal
+    </a>
+  </div>
+
+  <form x-data="createPostData()" @submit.prevent="savePost" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+    <!-- Main Content Area -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <div class="mb-6">
+          <label class="block text-sm font-bold text-dark mb-2">Judul Artikel</label>
+          <input type="text" x-model="post.title" @input="generateSlug" class="w-full px-4 py-3 text-lg font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Masukkan judul artikel yang menarik..." required>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-bold text-dark mb-2">Konten Artikel</label>
+          <!-- Editor Toolbar -->
+          <div class="flex flex-wrap items-center gap-1 p-2 bg-gray-50 border border-b-0 border-gray-300 rounded-t-lg">
+            <button type="button" @click="editor.chain().focus().toggleBold().run()" class="p-2 rounded hover:bg-gray-200" :class="{ 'bg-gray-200': editor?.isActive('bold') }" title="Bold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 12a4 4 0 0 0 0-8H6v8"/><path d="M15 20a4 4 0 0 0 0-8H6v8Z"/></svg>
+            </button>
+            <button type="button" @click="editor.chain().focus().toggleItalic().run()" class="p-2 rounded hover:bg-gray-200" :class="{ 'bg-gray-200': editor?.isActive('italic') }" title="Italic">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/></svg>
+            </button>
+            <div class="w-px h-6 bg-gray-300 mx-1"></div>
+            <button type="button" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()" class="p-2 rounded hover:bg-gray-200 font-bold" :class="{ 'bg-gray-200': editor?.isActive('heading', { level: 2 }) }" title="Heading 2">H2</button>
+            <button type="button" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()" class="p-2 rounded hover:bg-gray-200 font-bold" :class="{ 'bg-gray-200': editor?.isActive('heading', { level: 3 }) }" title="Heading 3">H3</button>
+            <div class="w-px h-6 bg-gray-300 mx-1"></div>
+            <button type="button" @click="editor.chain().focus().toggleBulletList().run()" class="p-2 rounded hover:bg-gray-200" :class="{ 'bg-gray-200': editor?.isActive('bulletList') }" title="Bullet List">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" x2="21" y1="12" y2="12"/><line x1="9" x2="21" y1="18" y2="18"/><line x1="9" x2="21" y1="6" y2="6"/><path d="M5 12h.01"/><path d="M5 18h.01"/><path d="M5 6h.01"/></svg>
+            </button>
+            <button type="button" @click="editor.chain().focus().toggleOrderedList().run()" class="p-2 rounded hover:bg-gray-200" :class="{ 'bg-gray-200': editor?.isActive('orderedList') }" title="Ordered List">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="21" y1="12" y2="12"/><line x1="10" x2="21" y1="18" y2="18"/><line x1="10" x2="21" y1="6" y2="6"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+            </button>
+            <button type="button" @click="editor.chain().focus().toggleBlockquote().run()" class="p-2 rounded hover:bg-gray-200" :class="{ 'bg-gray-200': editor?.isActive('blockquote') }" title="Quote">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+            </button>
+            <div class="w-px h-6 bg-gray-300 mx-1"></div>
+            <!-- Insert Image Button -->
+            <button type="button" @click="promptInsertImage" class="p-2 rounded hover:bg-gray-200" title="Insert Image">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            </button>
+          </div>
+          <!-- Editor Content -->
+          <div class="editor-content p-4 min-h-[400px] border border-gray-300 rounded-b-lg focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary prose max-w-none" x-ref="editorElement"></div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-dark mb-2">Ringkasan (Excerpt)</label>
+          <textarea x-model="post.excerpt" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Tulis ringkasan singkat artikel ini..."></textarea>
+          <p class="text-xs text-gray-500 mt-1">Muncul di halaman daftar blog dan hasil pencarian Google.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar / Settings -->
+    <div class="space-y-6">
+      <!-- Publish Box -->
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Status & Publikasi</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-dark mb-1">Status</label>
+            <select x-model="post.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none bg-white">
+              <option value="draft">Draft (Simpan Sementara)</option>
+              <option value="published">Publish (Tayangkan)</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors flex justify-center items-center gap-2 shadow-sm shadow-orange-500/20" :disabled="submitting">
+            <span x-show="!submitting">Simpan Artikel</span>
+            <span x-show="submitting" style="display: none;">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              Menyimpan...
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Categories Box -->
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Kategori</h2>
+        
+        <div x-show="categories.length === 0" class="text-sm text-gray-500 italic mb-2">
+          Memuat kategori...
+        </div>
+        
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          <template x-for="cat in categories" :key="cat.id">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" :value="cat.id" x-model="post.category_id" name="category" class="text-primary focus:ring-primary h-4 w-4">
+              <span class="text-sm text-dark" x-text="cat.name"></span>
+            </label>
+          </template>
+        </div>
+        
+        <a href="/admin/blog/categories" class="text-sm text-primary hover:underline mt-4 inline-block font-medium">+ Kelola Kategori</a>
+      </div>
+
+      <!-- Image Box -->
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Featured Image</h2>
+        
+        <div x-show="!post.featured_image" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors" @click="$refs.fileInput.click()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-gray-400 mb-2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+          <span class="text-sm font-medium text-primary">Upload Gambar</span>
+          <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP maks 2MB</p>
+        </div>
+        
+        <div x-show="post.featured_image" class="relative group" style="display: none;">
+          <img :src="post.featured_image" class="w-full h-auto rounded-lg border border-gray-200">
+          <button type="button" @click="post.featured_image = ''" class="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity shadow-sm" title="Hapus Gambar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+        
+        <!-- Hidden file input for feature image -->
+        <input type="file" x-ref="fileInput" class="hidden" accept="image/*" @change="uploadImage($event, 'featured')">
+        <!-- Hidden file input for content images -->
+        <input type="file" x-ref="contentFileInput" class="hidden" accept="image/*" @change="uploadImage($event, 'content')">
+        
+        <div x-show="uploadingImage" class="mt-2 text-sm text-primary flex items-center gap-2" style="display: none;">
+          <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          Mengunggah gambar...
+        </div>
+      </div>
+
+      <!-- SEO URL Box -->
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Pengaturan URL (Slug)</h2>
+        <input type="text" x-model="post.slug" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-sm bg-gray-50" required>
+        <p class="text-xs text-gray-500 mt-1">Dibuat otomatis dari judul.</p>
+      </div>
+    </div>
+  </form>
+</AdminLayout>
+
+<style is:global>
+  /* Tiptap styles */
+  .ProseMirror {
+    outline: none !important;
+    min-height: 400px;
+  }
+  .ProseMirror p {
+    margin-bottom: 1rem;
+  }
+  .ProseMirror h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  .ProseMirror h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .ProseMirror ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .ProseMirror ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .ProseMirror blockquote {
+    border-left: 4px solid #F57C00;
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
+    color: #4b5563;
+  }
+  .ProseMirror img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+  }
+</style>
+
+<script>
+  import { supabase } from '../../../lib/supabase';
+  import { Editor } from '@tiptap/core';
+  import StarterKit from '@tiptap/starter-kit';
+  import Image from '@tiptap/extension-image';
+
+  document.addEventListener('alpine:init', () => {
+    window.Alpine.data('createPostData', () => ({
+      editor: null,
+      categories: [],
+      submitting: false,
+      uploadingImage: false,
+      post: {
+        title: '',
+        slug: '',
+        excerpt: '',
+        content: '',
+        featured_image: '',
+        status: 'draft',
+        category_id: ''
+      },
+
+      async init() {
+        // Load categories
+        const { data } = await supabase.from('categories').select('*').order('name');
+        if (data) this.categories = data;
+
+        // Initialize Tiptap
+        this.editor = new Editor({
+          element: this.$refs.editorElement,
+          extensions: [
+            StarterKit,
+            Image.configure({
+              HTMLAttributes: {
+                class: 'rounded-lg border border-gray-200',
+              },
+            }),
+          ],
+          content: '',
+          onUpdate: ({ editor }) => {
+            this.post.content = editor.getHTML();
+          },
+          // Required for Vue/Alpine reactivity to update toolbar state
+          onSelectionUpdate: () => {
+             // Force Alpine reactivity update if needed, but methods work directly
+          },
+        });
+      },
+
+      generateSlug() {
+        this.post.slug = this.post.title
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      },
+
+      promptInsertImage() {
+        this.$refs.contentFileInput.click();
+      },
+
+      async uploadImage(event, type) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        this.uploadingImage = true;
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('folder', 'blog');
+
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const result = await res.json();
+
+          if (!res.ok) throw new Error(result.error || 'Upload failed');
+
+          if (type === 'featured') {
+            this.post.featured_image = result.url;
+          } else if (type === 'content') {
+            this.editor.chain().focus().setImage({ src: result.url }).run();
+          }
+        } catch (error: any) {
+          console.error('Error uploading image:', error);
+          alert('Gagal mengunggah gambar. Pesan: ' + (error.message || JSON.stringify(error)));
+        } finally {
+          this.uploadingImage = false;
+          event.target.value = ''; // Reset input
+        }
+      },
+
+      async savePost() {
+        if (!this.post.title || !this.post.slug) {
+          alert('Judul dan Slug wajib diisi!');
+          return;
+        }
+
+        this.submitting = true;
+        try {
+          const postData = {
+            ...this.post,
+            published_at: this.post.status === 'published' ? new Date().toISOString() : null
+          };
+
+          const { error } = await supabase
+            .from('blog_posts')
+            .insert([postData]);
+
+          if (error) {
+            if (error.code === '23505') {
+              alert('Slug sudah digunakan, silakan ubah sedikit judulnya.');
+            } else {
+              throw error;
+            }
+            return;
+          }
+
+          alert('Artikel berhasil disimpan!');
+          window.location.href = '/admin/blog';
+        } catch (error) {
+          console.error('Error saving post:', error);
+          alert('Gagal menyimpan artikel. Periksa koneksi atau izin database.');
+        } finally {
+          this.submitting = false;
+        }
+      }
+    }));
+  });
+</script>
