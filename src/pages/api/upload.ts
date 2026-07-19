@@ -1,12 +1,5 @@
 import type { APIRoute } from 'astro';
-// @ts-ignore
-import fs from 'node:fs';
-// @ts-ignore
-import path from 'node:path';
-
-// Deklarasi tipe dasar untuk menghilangkan pesan error TypeScript di Editor
-declare var process: any;
-declare var Buffer: any;
+import { supabase } from '../../lib/supabase';
 
 export const prerender = false;
 
@@ -26,23 +19,26 @@ export const POST: APIRoute = async ({ request }) => {
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
     
-    // Convert to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('media')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type,
+      });
 
-    // Ensure directory exists: public/uploads/<folder>
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', folder);
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    if (error) {
+      console.error('Supabase upload error:', error);
+      throw error;
     }
 
-    // Write file to local disk
-    const filePath = path.join(uploadDir, fileName);
-    fs.writeFileSync(filePath, buffer);
-
-    // Build public URL (starts from root /)
-    const publicUrl = `/uploads/${folder}/${fileName}`;
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('media')
+      .getPublicUrl(filePath);
 
     return new Response(JSON.stringify({ url: publicUrl }), {
       status: 200,
