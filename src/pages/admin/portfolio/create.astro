@@ -117,7 +117,14 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           formData.append('file', file);
           formData.append('folder', 'portfolio');
 
-          const res = await fetch('/api/upload', { method: 'POST', body: formData });
+          const sessionData = await supabase.auth.getSession();
+          const token = sessionData.data.session?.access_token;
+
+          const res = await fetch('/api/upload', { 
+            method: 'POST', 
+            body: formData,
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
           const result = await res.json();
           if (!res.ok) throw new Error(result.error || 'Upload failed');
 

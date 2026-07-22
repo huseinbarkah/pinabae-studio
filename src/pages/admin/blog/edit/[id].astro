@@ -220,9 +220,13 @@ if (!initialPost) {
           formData.append('file', file);
           formData.append('folder', 'blog');
 
+          const sessionData = await supabase.auth.getSession();
+          const token = sessionData.data.session?.access_token;
+
           const res = await fetch('/api/upload', {
             method: 'POST',
             body: formData,
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
           });
 
           const result = await res.json();
