@@ -10,4 +10,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  image: {
+    domains: ['fwrmljqxfbiykncadfqo.supabase.co'],
+  },
 });

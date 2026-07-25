@@ -43,16 +43,44 @@ const {
 		<!-- Google Fonts: Plus Jakarta Sans -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap">
 		<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+		
+		<!-- Schema.org JSON-LD -->
+		<script type="application/ld+json" set:html={`
+		{
+		  "@context": "https://schema.org",
+		  "@type": "Organization",
+		  "name": "Pinabae Studio",
+		  "url": "https://pinabae-studio.vercel.app/",
+		  "logo": "https://pinabae-studio.vercel.app/logo.png",
+		  "description": "Jasa pembuatan website profesional untuk membantu UMKM, startup, dan personal brand tumbuh di era digital."
+		}
+		`} />
+		<script type="application/ld+json" set:html={`
+		{
+		  "@context": "https://schema.org",
+		  "@type": "WebSite",
+		  "name": "Pinabae Studio",
+		  "url": "https://pinabae-studio.vercel.app/"
+		}
+		`} />
 	</head>
 	<body class="flex flex-col min-h-screen">
 		<slot />
 		
-		<!-- Smooth Scrolling (Lenis) -->
+		<!-- Smooth Scrolling (Lenis) & Lucide Icons -->
 		<script>
 		  import Lenis from 'lenis';
+		  import { createIcons, icons } from 'lucide';
+
 		  const lenis = new Lenis({
 			autoRaf: true,
+		  });
+
+		  createIcons({
+			icons,
+			nameAttr: 'data-lucide'
 		  });
 		</script>
 	</body>

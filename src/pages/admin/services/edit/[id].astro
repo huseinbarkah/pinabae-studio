@@ -30,7 +30,7 @@ if (!initialData) {
     </a>
   </div>
 
-  <form x-data={`editServiceData(${JSON.stringify(initialData)})`} @submit.prevent="updateService" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12" id="service-form">
+  <form x-data="editServiceData()" @submit.prevent="updateService" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12" id="service-form">
     <!-- Main Content Area -->
     <div class="lg:col-span-2 space-y-6">
       <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
@@ -78,13 +78,18 @@ if (!initialData) {
   </form>
 </AdminLayout>
 
-<script define:vars={{ serviceId: id }}>
+<script define:vars={{ serviceId: id, initialData }}>
+  window.__EDIT_SERVICE_ID__ = serviceId;
+  window.__EDIT_INITIAL_DATA__ = initialData;
+</script>
+
+<script>
   import { supabase } from '../../../../lib/supabase';
 
   document.addEventListener('alpine:init', () => {
-    window.Alpine.data('editServiceData', (initialData) => ({
+    window.Alpine.data('editServiceData', () => ({
       submitting: false,
-      service: initialData || {
+      service: window.__EDIT_INITIAL_DATA__ || {
         title: '',
         slug: '',
         description: '',
@@ -115,7 +120,7 @@ if (!initialData) {
           const { error } = await supabase
             .from('services')
             .update(this.service)
-            .eq('id', serviceId);
+            .eq('id', window.__EDIT_SERVICE_ID__);
 
           if (error) {
             if (error.code === '23505') {

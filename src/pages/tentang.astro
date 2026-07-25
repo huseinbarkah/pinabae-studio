@@ -1,8 +1,11 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import Section from '../components/ui/Section.astro';
+import Button from '../components/ui/Button.astro';
+import Card from '../components/ui/Card.astro';
 import { supabase } from '../lib/supabase';
 
 let teamMembers = [];
@@ -17,170 +20,370 @@ try {
 }
 ---
 
-<Layout title="Tentang Kami | Pinabae Studio" description="Pinabae Studio adalah digital agency yang berfokus pada pembuatan website berkualitas tinggi.">
+<Layout title="Tentang Kami | Pinabae Studio" description="Pinabae Studio adalah digital agency asal Sumbawa yang membantu bisnis membangun kehadiran digital profesional.">
   <Navbar />
   
   <main class="flex-grow pt-32">
-    <Section class="text-center pb-16">
-      <div class="max-w-3xl mx-auto header-anim opacity-0 translate-y-8">
-        <h1 class="text-5xl md:text-7xl font-extrabold text-dark tracking-tight mb-8">Pina<span class="text-primary">Bae</span></h1>
-        <p class="text-xl text-text text-balance">
-           <b>Pinabae</b> berasal dari bahasa Sumbawa yang berarti <b>"Buat Saja."</b>
-Filosofi ini menjadi pengingat bahwa membangun kehadiran digital tidak harus rumit. Kami membantu bisnis, UMKM, dan personal brand memiliki website profesional yang modern, cepat, dan siap mendukung pertumbuhan bisnis.
+    <!-- SECTION 1 — Hero About -->
+    <Section class="pb-16 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-50/60 rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/4 pointer-events-none"></div>
+      
+      <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+        <div class="lg:w-1/2 fade-up-anim opacity-0 translate-y-8">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full text-sm text-primary font-bold mb-6">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+            Digital Agency • Sumbawa, NTB
+          </div>
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-dark tracking-tight mb-6 leading-[1.15]">
+            Membangun Solusi Digital untuk Membantu Bisnis Bertumbuh
+          </h1>
+          <p class="text-lg md:text-xl text-text leading-relaxed mb-10 text-balance">
+            Pinabae Studio adalah digital agency asal Sumbawa yang membantu UMKM, perusahaan, startup, dan personal brand membangun kehadiran digital yang profesional. Kami percaya bahwa platform bisnis bukan sekadar identitas online, tetapi aset digital yang mampu meningkatkan kepercayaan, memperluas jangkauan pelanggan, dan mendorong pertumbuhan bisnis.
+          </p>
+         
+        </div>
+        
+        <div class="lg:w-1/2 w-full fade-up-anim opacity-0 translate-y-8 delay-100 relative">
+          <!-- Website Mockup Illustration -->
+          <div class="relative w-full aspect-[4/3] bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(249,115,22,0.15)] border border-gray-100 overflow-hidden flex flex-col">
+            <div class="h-10 border-b border-gray-100 bg-gray-50/50 flex items-center px-4 gap-2 shrink-0">
+              <div class="w-3 h-3 rounded-full bg-red-400"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+              <div class="w-3 h-3 rounded-full bg-green-400"></div>
+            </div>
+            <div class="flex-grow p-6 md:p-8 bg-gray-50 relative overflow-hidden">
+              <div class="w-full h-32 md:h-40 bg-orange-100/50 rounded-xl mb-5"></div>
+              <div class="w-3/4 h-6 bg-gray-200 rounded-md mb-3"></div>
+              <div class="w-1/2 h-6 bg-gray-200 rounded-md mb-8"></div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="h-24 bg-white rounded-xl shadow-sm"></div>
+                <div class="h-24 bg-white rounded-xl shadow-sm"></div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <!-- SECTION 2 — Cerita di Balik Pinabae -->
+    <Section background="gray" class="py-24 text-center">
+      <div class="max-w-3xl mx-auto fade-up-anim opacity-0 translate-y-8">
+        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-sm text-primary">
+          <i data-lucide="sparkles" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-dark tracking-tight mb-6">Cerita di Balik Nama Pinabae</h2>
+        <p class="text-lg md:text-xl text-text leading-relaxed text-balance">
+          <strong>Pinabae</strong> berasal dari bahasa Sumbawa yang berarti <em>"Buat Saja"</em>. Filosofi ini menjadi semangat kami bahwa membangun solusi digital tidak perlu rumit. Kami membantu bisnis berkembang melalui platform yang modern, cepat, dan dirancang sesuai kebutuhan tanpa proses yang berbelit-belit.
         </p>
       </div>
     </Section>
 
-    <Section>
-      <!-- Top Section -->
-      <div class="flex flex-col lg:flex-row gap-6 lg:gap-16 justify-between items-start mb-16 fade-up-anim opacity-0 translate-y-8">
-        <div class="lg:w-1/2">
-          <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-dark tracking-tight leading-[1.1]">
-            Mengapa Memilih <br class="hidden lg:block" />
-            <span class="text-primary">Pinabae Studio</span>
-          </h2>
-        </div>
-        
-        <div class="lg:w-1/2 lg:pt-4">
-          <p class="text-lg md:text-xl text-text leading-relaxed text-balance">
-            Kami membangun website yang tidak hanya menarik secara visual, tetapi juga cepat, responsif, dan dirancang untuk membantu bisnis tampil lebih profesional serta dipercaya oleh pelanggan.
+    <!-- SECTION 3 — Visi & Misi -->
+    <Section class="py-24">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+        <Card hover={false} class="p-10 md:p-12 fade-up-anim opacity-0 translate-y-8 flex flex-col items-start border-gray-200">
+          <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-primary mb-8">
+            <i data-lucide="target" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-3xl font-bold text-dark mb-6 tracking-tight">Visi</h3>
+          <p class="text-lg text-text leading-relaxed flex-grow">
+            Menjadi digital agency terpercaya di Sumbawa yang membantu bisnis lokal berkembang melalui solusi digital yang efektif, modern, dan berorientasi pada hasil.
           </p>
-        </div>
+        </Card>
+        
+        <Card hover={false} class="p-10 md:p-12 fade-up-anim opacity-0 translate-y-8 flex flex-col items-start border-gray-200 bg-dark text-white border-none shadow-xl shadow-gray-900/10">
+          <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-primary mb-8">
+            <i data-lucide="flag" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-3xl font-bold mb-6 text-dark tracking-tight">Misi</h3>
+          <ul class="text-lg text-dark leading-relaxed space-y-5 flex-grow">
+            <li class="flex items-start gap-4">
+              <i data-lucide="check-circle-2" class="w-6 h-6 text-primary shrink-0 mt-0.5"></i>
+              <span>Membantu UMKM memiliki identitas digital profesional.</span>
+            </li>
+            <li class="flex items-start gap-4">
+              <i data-lucide="check-circle-2" class="w-6 h-6 text-primary shrink-0 mt-0.5"></i>
+              <span>Mengembangkan aset digital yang cepat, modern, dan SEO Friendly.</span>
+            </li>
+            <li class="flex items-start gap-4">
+              <i data-lucide="check-circle-2" class="w-6 h-6 text-primary shrink-0 mt-0.5"></i>
+              <span>Memberikan pelayanan yang transparan dan mudah dipahami.</span>
+            </li>
+            <li class="flex items-start gap-4">
+              <i data-lucide="check-circle-2" class="w-6 h-6 text-primary shrink-0 mt-0.5"></i>
+              <span>Menjadi partner digital jangka panjang bagi setiap klien.</span>
+            </li>
+          </ul>
+        </Card>
+      </div>
+    </Section>
+
+    <!-- SECTION 4 — Nilai yang Kami Pegang -->
+    <Section class="py-24 bg-[#F8FAFC]">
+      <div class="text-center max-w-3xl mx-auto mb-16 fade-up-anim opacity-0 translate-y-8">
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-dark tracking-tight mb-6">Nilai yang Kami Pegang</h2>
+        <p class="text-lg text-text">Prinsip utama yang menjadi landasan kami dalam memberikan solusi digital terbaik untuk setiap klien.</p>
       </div>
 
-      <!-- Subtle Divider -->
-      <div class="w-full h-px bg-gray-200/60 mb-16 fade-up-anim opacity-0 translate-y-4"></div>
-
-      <!-- Four Premium Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 card-grid">
-        <!-- Card 1 -->
-        <div class="card-anim opacity-0 translate-y-8">
-          <div class="h-full group bg-white rounded-[24px] p-8 lg:p-10 border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(245,124,0,0.12)]">
-            <div class="w-14 h-14 rounded-2xl bg-orange-50/50 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-500 ease-out">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary lucide lucide-layout"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
-            </div>
-            <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">Desain Modern</h3>
-            <p class="text-text leading-relaxed">
-              Setiap website dirancang dengan tampilan yang bersih, profesional, dan mudah digunakan agar memberikan kesan pertama yang positif bagi pengunjung.
-            </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
+        <Card hover={false} class="p-8 lg:p-10 fade-up-anim opacity-0 translate-y-8 group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+          <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-300">
+            <i data-lucide="lightbulb" class="w-8 h-8"></i>
           </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="card-anim opacity-0 translate-y-8">
-          <div class="h-full group bg-white rounded-[24px] p-8 lg:p-10 border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(245,124,0,0.12)]">
-            <div class="w-14 h-14 rounded-2xl bg-orange-50/50 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-500 ease-out">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary lucide lucide-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            </div>
-            <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">Performa Cepat</h3>
-            <p class="text-text leading-relaxed">
-              Website dioptimalkan agar memiliki waktu muat yang cepat, responsif di berbagai perangkat, dan memberikan pengalaman pengguna yang nyaman.
-            </p>
+          <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">Berorientasi pada Solusi</h3>
+          <p class="text-text leading-relaxed">
+            Kami memahami kebutuhan bisnis terlebih dahulu sebelum menentukan strategi digital yang tepat sasaran.
+          </p>
+        </Card>
+        
+        <Card hover={false} class="p-8 lg:p-10 fade-up-anim opacity-0 translate-y-8 group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 delay-75">
+          <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-300">
+            <i data-lucide="handshake" class="w-8 h-8"></i>
           </div>
-        </div>
+          <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">Kolaborasi</h3>
+          <p class="text-text leading-relaxed">
+            Kami percaya komunikasi yang baik dan kolaborasi erat menghasilkan platform yang sejalan dengan tujuan bisnis.
+          </p>
+        </Card>
 
-        <!-- Card 3 -->
-        <div class="card-anim opacity-0 translate-y-8">
-          <div class="h-full group bg-white rounded-[24px] p-8 lg:p-10 border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(245,124,0,0.12)]">
-            <div class="w-14 h-14 rounded-2xl bg-orange-50/50 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-500 ease-out">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            </div>
-            <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">SEO Friendly</h3>
-            <p class="text-text leading-relaxed">
-              Kami menerapkan praktik terbaik SEO sejak awal pengembangan agar website lebih mudah ditemukan melalui mesin pencari.
-            </p>
+        <Card hover={false} class="p-8 lg:p-10 fade-up-anim opacity-0 translate-y-8 group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 delay-100">
+          <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-300">
+            <i data-lucide="shield-check" class="w-8 h-8"></i>
           </div>
-        </div>
+          <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">Transparansi</h3>
+          <p class="text-text leading-relaxed">
+            Mulai dari konsultasi, proses pengerjaan, hingga revisi dilakukan secara terbuka tanpa adanya biaya tersembunyi.
+          </p>
+        </Card>
 
-        <!-- Card 4 -->
-        <div class="card-anim opacity-0 translate-y-8">
-          <div class="h-full group bg-white rounded-[24px] p-8 lg:p-10 border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(245,124,0,0.12)]">
-            <div class="w-14 h-14 rounded-2xl bg-orange-50/50 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-500 ease-out">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary lucide lucide-life-buoy"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" x2="9.17" y1="4.93" y2="9.17"/><line x1="14.83" x2="19.07" y1="14.83" y2="19.07"/><line x1="14.83" x2="19.07" y1="9.17" y2="4.93"/><line x1="14.83" x2="19.07" y1="9.17" y2="4.93" /><line x1="4.93" x2="9.17" y1="19.07" y2="14.83"/></svg>
+        <Card hover={false} class="p-8 lg:p-10 fade-up-anim opacity-0 translate-y-8 group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 delay-150">
+          <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:bg-orange-100 transition-all duration-300">
+            <i data-lucide="trending-up" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">Fokus pada Pertumbuhan</h3>
+          <p class="text-text leading-relaxed">
+            Target kami bukan sekadar menyelesaikan proyek, tetapi membantu bisnis memperoleh lebih banyak peluang melalui pengalaman digital.
+          </p>
+        </Card>
+      </div>
+    </Section>
+
+    <!-- SECTION 5 — Cara Kami Bekerja -->
+    <Section class="py-24 overflow-hidden">
+      <div class="text-center max-w-3xl mx-auto mb-20 fade-up-anim opacity-0 translate-y-8">
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-dark tracking-tight mb-6">Cara Kami Bekerja</h2>
+        <p class="text-lg text-text">Proses sistematis yang kami terapkan untuk memastikan hasil yang optimal, tepat waktu, dan berdampak nyata bagi bisnis Anda.</p>
+      </div>
+
+      <div class="relative max-w-6xl mx-auto">
+        <!-- Horizontal Line for Desktop / Tablet -->
+        <div class="hidden md:block absolute top-[44px] left-[8%] right-[8%] h-0.5 bg-gray-200 -z-10"></div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-10 lg:gap-6">
+          <!-- Step 1 -->
+          <div class="flex flex-col items-center text-center fade-up-anim opacity-0 translate-y-8">
+            <div class="w-24 h-24 bg-white rounded-full border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-primary mb-6 relative z-10 hover:scale-110 hover:text-orange-600 transition-all duration-300">
+              <i data-lucide="message-circle" class="w-8 h-8"></i>
             </div>
-            <h3 class="text-2xl font-bold text-dark mb-4 tracking-tight">Dukungan Berkelanjutan</h3>
-            <p class="text-text leading-relaxed">
-              Kami tetap mendampingi Anda setelah website selesai melalui konsultasi, pembaruan, dan dukungan teknis sesuai kebutuhan.
-            </p>
+            <h3 class="text-lg font-bold text-dark mb-3">1. Konsultasi</h3>
+            <p class="text-sm text-text leading-relaxed">Kami memahami bisnis dan kebutuhan Anda secara mendalam.</p>
+          </div>
+          
+          <!-- Step 2 -->
+          <div class="flex flex-col items-center text-center fade-up-anim opacity-0 translate-y-8 delay-75">
+            <div class="w-24 h-24 bg-white rounded-full border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-primary mb-6 relative z-10 hover:scale-110 hover:text-orange-600 transition-all duration-300">
+              <i data-lucide="clipboard-list" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark mb-3">2. Perencanaan</h3>
+            <p class="text-sm text-text leading-relaxed">Menentukan strategi, struktur digital, dan fitur yang dibutuhkan.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flex flex-col items-center text-center fade-up-anim opacity-0 translate-y-8 delay-100">
+            <div class="w-24 h-24 bg-white rounded-full border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-primary mb-6 relative z-10 hover:scale-110 hover:text-orange-600 transition-all duration-300">
+              <i data-lucide="pen-tool" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark mb-3">3. Desain</h3>
+            <p class="text-sm text-text leading-relaxed">Mendesain tampilan yang modern, bersih, dan mudah digunakan.</p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="flex flex-col items-center text-center fade-up-anim opacity-0 translate-y-8 delay-150">
+            <div class="w-24 h-24 bg-white rounded-full border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-primary mb-6 relative z-10 hover:scale-110 hover:text-orange-600 transition-all duration-300">
+              <i data-lucide="code-2" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark mb-3">4. Development</h3>
+            <p class="text-sm text-text leading-relaxed">Membangun platform menggunakan teknologi modern berkinerja tinggi.</p>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="flex flex-col items-center text-center fade-up-anim opacity-0 translate-y-8 delay-200">
+            <div class="w-24 h-24 bg-white rounded-full border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-primary mb-6 relative z-10 hover:scale-110 hover:text-orange-600 transition-all duration-300">
+              <i data-lucide="rocket" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark mb-3">5. Launch</h3>
+            <p class="text-sm text-text leading-relaxed">Platform dipublikasikan secara resmi dan siap menyapa dunia.</p>
+          </div>
+
+          <!-- Step 6 -->
+          <div class="flex flex-col items-center text-center fade-up-anim opacity-0 translate-y-8 delay-300">
+            <div class="w-24 h-24 bg-white rounded-full border-[6px] border-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center justify-center text-primary mb-6 relative z-10 hover:scale-110 hover:text-orange-600 transition-all duration-300">
+              <i data-lucide="life-buoy" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark mb-3">6. Support</h3>
+            <p class="text-sm text-text leading-relaxed">Kami tetap memberikan bantuan penuh setelah proyek selesai.</p>
           </div>
         </div>
       </div>
     </Section>
 
-    <Section>
-      <!-- Top Section -->
-      <div class="flex flex-col lg:flex-row gap-6 lg:gap-16 justify-between items-start mb-16 fade-up-anim opacity-0 translate-y-8">
-        <div class="lg:w-1/2">
-          <span class="inline-block text-primary font-bold tracking-wider text-sm mb-4 uppercase">Tim Pinabae Studio</span>
-          <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-dark tracking-tight leading-[1.1]">
-            Orang-Orang di Balik <br class="hidden lg:block" />
-            Pinabae Studio
-          </h2>
-        </div>
-        
-        <div class="lg:w-1/2 lg:pt-10">
-          <p class="text-lg md:text-xl text-text leading-relaxed text-balance">
-            Setiap website yang kami bangun merupakan hasil kolaborasi antara kreativitas, strategi, dan teknologi. Kami percaya bahwa komunikasi yang baik, perhatian terhadap detail, dan proses yang transparan adalah kunci untuk menghasilkan solusi digital yang benar-benar memberikan nilai bagi setiap bisnis.
-          </p>
-        </div>
+    <!-- SECTION 6 — Tim Kami -->
+    <Section class="py-24 bg-[#F8FAFC]">
+      <div class="text-center max-w-3xl mx-auto mb-16 fade-up-anim opacity-0 translate-y-8">
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-dark tracking-tight mb-6">Tim Kami</h2>
+        <p class="text-lg text-text">Orang-orang di balik Pinabae Studio yang berkomitmen menghadirkan solusi digital terbaik untuk membantu bisnis bertumbuh.</p>
       </div>
 
-      <!-- Subtle Divider -->
-      <div class="w-full h-px bg-gray-200/60 mb-16 fade-up-anim opacity-0 translate-y-4"></div>
-
-      <!-- Team Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 card-grid">
+      <div class={`grid gap-5 md:gap-6 mx-auto px-4 sm:px-0 ${
+        teamMembers.length === 1 ? 'grid-cols-1 max-w-[260px] sm:max-w-xs' :
+        teamMembers.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-xl' :
+        'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-5xl'
+      } team-grid`}>
         {teamMembers && teamMembers.length > 0 ? (
           teamMembers.map((member: any) => (
-            <div class="card-anim opacity-0 translate-y-8 h-full">
-              <div class="h-full group bg-white rounded-[24px] border border-gray-200/60 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(245,124,0,0.12)] flex flex-col p-3">
-                <div class="relative h-72 md:h-80 w-full overflow-hidden rounded-[20px] bg-gray-100 mb-4">
+            <div class="team-card opacity-0 translate-y-10 h-full">
+              <div class="group h-full bg-white rounded-2xl p-3 sm:p-4 border border-gray-100 shadow-sm transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-orange-500 hover:shadow-2xl hover:shadow-orange-900/10 flex flex-col items-center text-center overflow-hidden">
+                
+                <div class="w-full aspect-[4/5] rounded-xl bg-gray-100 mb-5 overflow-hidden relative">
                   {member.photo_url ? (
-                    <img src={member.photo_url} alt={member.name} class="w-full h-full object-cover transition-all duration-700 ease-out grayscale group-hover:grayscale-0 group-hover:scale-105" />
+                    <Image src={member.photo_url} alt={member.name} width={400} height={500} class="w-full h-full object-cover grayscale opacity-85 transition-all duration-500 ease-out group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-[1.03]" loading="lazy" />
                   ) : (
-                    <div class="w-full h-full flex items-center justify-center text-gray-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <div class="w-full h-full flex items-center justify-center text-gray-300">
+                      <i data-lucide="user" class="w-16 h-16"></i>
                     </div>
                   )}
-
-
                 </div>
 
-                <div class="px-3 pb-3 flex flex-col flex-grow">
-                  <h3 class="text-[20px] font-bold text-dark tracking-tight mb-1">{member.name}</h3>
-                  <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-4">{member.position}</p>
+                <div class="flex flex-col flex-grow w-full px-1">
+                  <h3 class="text-lg font-bold text-dark mb-1 group-hover:text-primary transition-colors duration-300 tracking-tight">{member.name}</h3>
+                  <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-3">{member.position}</p>
                   
                   {member.biography && (
-                    <p class="text-sm text-text leading-relaxed flex-grow">
+                    <p class="text-sm text-text leading-relaxed flex-grow mb-5">
                       {member.biography}
                     </p>
                   )}
                   
-                  {(member.instagram_url || member.linkedin_url) && (
-                    <div class="mt-4 pt-4 border-t border-gray-100 flex gap-3">
-                      {member.linkedin_url && (
-                        <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-[#0A66C2] hover:text-white transition-colors duration-300">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                        </a>
-                      )}
-                      {member.instagram_url && (
-                        <a href={member.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-orange-50 hover:text-primary transition-colors duration-300">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  <div class="mt-auto flex justify-center gap-3 pt-4 border-t border-gray-100 w-full">
+                    <a href={member.instagram_url || "#"} target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="text-gray-400 hover:text-primary transition-colors duration-300 p-1 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                    </a>
+                    <a href={member.linkedin_url || "#"} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="text-gray-400 hover:text-primary transition-colors duration-300 p-1 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                    </a>
+                    {member.github_url && (
+                      <a href={member.github_url} target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="text-gray-400 hover:text-primary transition-colors duration-300 p-1 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.2c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                      </a>
+                    )}
+                    {member.website_url && (
+                      <a href={member.website_url} target="_blank" rel="noopener noreferrer" aria-label="Website" class="text-gray-400 hover:text-primary transition-colors duration-300 p-1 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div class="col-span-full text-center py-12 text-gray-500">
-            Tim belum ditambahkan.
+          <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-6">
+              <i data-lucide="users" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-xl font-bold text-dark mb-2">Belum ada anggota tim</h3>
+            <p class="text-text">Belum ada anggota tim yang ditampilkan saat ini.</p>
           </div>
         )}
       </div>
     </Section>
+
+    <!-- SECTION 7 — Perjalanan Pinabae Studio -->
+    <Section class="py-24 bg-[#F8FAFC]">
+      <div class="text-center max-w-3xl mx-auto mb-20 fade-up-anim opacity-0 translate-y-8">
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-dark tracking-tight mb-6">Perjalanan Pinabae Studio</h2>
+        <p class="text-lg text-text">Langkah demi langkah kami membangun dan berkembang bersama klien.</p>
+      </div>
+
+      <div class="max-w-2xl mx-auto relative px-4 sm:px-0">
+        <!-- Vertical Line -->
+        <div class="absolute left-[39px] md:left-1/2 top-0 bottom-0 w-1 bg-orange-100 md:-translate-x-1/2 rounded-full"></div>
+
+        <div class="space-y-12">
+          <!-- Item 1 -->
+          <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between group fade-up-anim opacity-0 translate-y-8">
+            <div class="hidden md:block w-[45%] text-right pr-12">
+              <h3 class="text-3xl font-extrabold text-dark tracking-tight">2026</h3>
+            </div>
+            <div class="absolute left-0 md:left-1/2 w-[22px] h-[22px] ml-[11px] md:ml-0 bg-white border-4 border-primary rounded-full z-10 md:-translate-x-1/2 group-hover:scale-125 transition-transform duration-300 shadow-sm mt-3 md:mt-0">
+            </div>
+            <div class="pl-20 md:pl-12 md:w-[45%]">
+              <h3 class="text-2xl md:hidden font-extrabold text-dark mb-3">2026</h3>
+              <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
+                <p class="text-lg text-text font-medium">Pinabae Studio resmi didirikan.</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Item 2 -->
+          <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between group fade-up-anim opacity-0 translate-y-8">
+            <div class="hidden md:block w-[45%] text-right pr-12">
+              <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
+                <p class="text-lg text-text font-medium">Mulai berkolaborasi dan membantu UMKM lokal.</p>
+              </div>
+            </div>
+            <div class="absolute left-0 md:left-1/2 w-[22px] h-[22px] ml-[11px] md:ml-0 bg-white border-4 border-orange-300 rounded-full z-10 md:-translate-x-1/2 group-hover:border-primary group-hover:scale-125 transition-all duration-300 shadow-sm mt-5 md:mt-0">
+            </div>
+            <div class="pl-20 md:hidden">
+              <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
+                <p class="text-lg text-text font-medium">Mulai berkolaborasi dan membantu UMKM lokal.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between group fade-up-anim opacity-0 translate-y-8">
+            <div class="hidden md:block w-[45%] pr-12"></div>
+            <div class="absolute left-0 md:left-1/2 w-[22px] h-[22px] ml-[11px] md:ml-0 bg-white border-4 border-orange-300 rounded-full z-10 md:-translate-x-1/2 group-hover:border-primary group-hover:scale-125 transition-all duration-300 shadow-sm mt-5 md:mt-0">
+            </div>
+            <div class="pl-20 md:pl-12 md:w-[45%]">
+              <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all">
+                <p class="text-lg text-text font-medium">Mengembangkan layanan Website & SEO.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 4 -->
+          <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between group fade-up-anim opacity-0 translate-y-8">
+            <div class="hidden md:block w-[45%] text-right pr-12">
+              <div class="bg-primary p-6 rounded-2xl shadow-md border border-orange-600 group-hover:shadow-lg transition-all transform group-hover:-translate-y-1">
+                <p class="text-lg text-white font-bold">Menjadi Digital Agency yang fokus pada pertumbuhan bisnis.</p>
+              </div>
+            </div>
+            <div class="absolute left-0 md:left-1/2 w-10 h-10 ml-[2px] md:ml-0 bg-primary border-[6px] border-orange-100 rounded-full z-10 md:-translate-x-1/2 shadow-sm flex items-center justify-center mt-6 md:mt-0">
+               <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
+            </div>
+            <div class="pl-20 md:hidden">
+              <div class="bg-primary p-6 rounded-2xl shadow-md border border-orange-600 group-hover:shadow-lg transition-all transform group-hover:-translate-y-1">
+                <p class="text-lg text-white font-bold">Menjadi Digital Agency yang fokus pada pertumbuhan bisnis.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
   </main>
 
   <Footer />
@@ -192,26 +395,29 @@ Filosofi ini menjadi pengingat bahwa membangun kehadiran digital tidak harus rum
 
   gsap.registerPlugin(ScrollTrigger);
 
-  gsap.to('.header-anim', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
-  
-  gsap.utils.toArray('.content-anim').forEach((el: any) => {
-    gsap.to(el, {
+  // Animate team cards on scroll
+  gsap.utils.toArray('.team-grid').forEach((grid: any) => {
+    gsap.to(grid.querySelectorAll('.team-card'), {
       scrollTrigger: {
-        trigger: el,
-        start: 'top 80%',
+        trigger: grid,
+        start: 'top 85%',
+        once: true
       },
       opacity: 1,
-      x: 0,
+      y: 0,
       duration: 0.8,
-      ease: 'power2.out'
+      stagger: 0.15,
+      ease: 'power3.out'
     });
   });
 
+  // Animate fade-up elements on scroll
   gsap.utils.toArray('.fade-up-anim').forEach((el: any) => {
     gsap.to(el, {
       scrollTrigger: {
         trigger: el,
-        start: 'top 80%',
+        start: 'top 85%',
+        once: true
       },
       opacity: 1,
       y: 0,
@@ -219,19 +425,4 @@ Filosofi ini menjadi pengingat bahwa membangun kehadiran digital tidak harus rum
       ease: 'power3.out'
     });
   });
-
-  gsap.utils.toArray('.card-grid').forEach((grid: any) => {
-    gsap.to(grid.querySelectorAll('.card-anim'), {
-      scrollTrigger: {
-        trigger: grid,
-        start: 'top 80%',
-      },
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: 'power3.out'
-    });
-  });
-
 </script>

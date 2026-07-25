@@ -30,7 +30,7 @@ if (!initialData) {
     </a>
   </div>
 
-  <form x-data={`editPortfolioData(${JSON.stringify(initialData)})`} @submit.prevent="updatePortfolio" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12" id="editor-form">
+  <form x-data="editPortfolioData()" @submit.prevent="updatePortfolio" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12" id="editor-form">
     <!-- Main Content Area -->
     <div class="lg:col-span-2 space-y-6">
       <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
@@ -93,14 +93,19 @@ if (!initialData) {
   </form>
 </AdminLayout>
 
-<script define:vars={{ itemId: id }}>
+<script define:vars={{ itemId: id, initialData }}>
+  window.__EDIT_ITEM_ID__ = itemId;
+  window.__EDIT_INITIAL_DATA__ = initialData;
+</script>
+
+<script>
   import { supabase } from '../../../../lib/supabase';
 
   document.addEventListener('alpine:init', () => {
-    window.Alpine.data('editPortfolioData', (initialData) => ({
+    window.Alpine.data('editPortfolioData', () => ({
       submitting: false,
       uploadingImage: false,
-      item: initialData || {
+      item: window.__EDIT_INITIAL_DATA__ || {
         title: '',
         slug: '',
         client_name: '',
@@ -161,7 +166,7 @@ if (!initialData) {
           const { error } = await supabase
             .from('portfolio')
             .update(this.item)
-            .eq('id', itemId);
+            .eq('id', window.__EDIT_ITEM_ID__);
 
           if (error) {
             if (error.code === '23505') {

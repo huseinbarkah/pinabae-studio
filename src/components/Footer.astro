@@ -1,47 +1,163 @@
 ---
-// src/components/Footer.astro
-const currentYear = new Date().getFullYear();
+import { Image } from 'astro:assets';
+import logoImg from '../assets/logo.png';
 ---
 
-<footer class="bg-section border-t border-border mt-20 pt-16 pb-8">
-  <div class="container mx-auto px-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-      <div class="col-span-1 md:col-span-2">
-        <a href="/" class="flex items-center mb-6 hover:opacity-80 transition-opacity inline-flex">
-          <img src="/logo.png" alt="Pinabae Studio Logo" class="h-16 w-auto" />
+<footer class="bg-section border-t border-border mt-20 pt-16 pb-8 overflow-hidden">
+  <div class="container mx-auto px-6 footer-anim opacity-0 translate-y-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+      
+      <!-- Column 1: Tentang Pinabae Studio -->
+      <div class="flex flex-col">
+        <a href="/" class="mb-6 hover:opacity-80 transition-opacity inline-flex">
+          <Image src={logoImg} alt="Pinabae Studio Logo" class="h-16 w-auto" width={128} height={128} loading="lazy" />
         </a>
-        <p class="text-text max-w-sm mb-6">
-          Jasa pembuatan website profesional untuk membantu UMKM, startup, dan personal brand tumbuh di era digital.
+        <p class="text-text leading-relaxed mb-6">
+          Solusi digital untuk membantu bisnis tumbuh melalui website profesional, SEO, dan strategi digital.
         </p>
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-full text-sm text-text font-medium shadow-sm w-fit mt-auto">
+          <i data-lucide="map-pin" class="w-4 h-4 text-primary"></i>
+          Sumbawa, Nusa Tenggara Barat
+        </div>
       </div>
       
+      <!-- Column 2: Layanan -->
       <div>
-        <h3 class="font-bold text-dark mb-4">Layanan</h3>
-        <ul class="space-y-3">
-          <li><a href="/layanan/company-profile" class="text-text hover:text-primary transition-colors">Company Profile</a></li>
-          <li><a href="/layanan/e-commerce" class="text-text hover:text-primary transition-colors">E-Commerce</a></li>
-          <li><a href="/layanan/landing-page" class="text-text hover:text-primary transition-colors">Landing Page</a></li>
-          <li><a href="/layanan/custom-webapp" class="text-text hover:text-primary transition-colors">Custom Web App</a></li>
+        <h3 class="font-bold text-dark text-lg mb-6">Layanan</h3>
+        <ul class="space-y-4">
+          <li>
+            <a href="/layanan/company-profile" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="building-2" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>Company Profile</span>
+            </a>
+          </li>
+          <li>
+            <a href="/layanan/portfolio-website" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="user-square" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>Portfolio Website</span>
+            </a>
+          </li>
+          <li>
+            <a href="/layanan/landing-page" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="layout-template" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>Landing Page</span>
+            </a>
+          </li>
+          <li>
+            <a href="/layanan/seo-optimization" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="search" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>SEO Optimization</span>
+            </a>
+          </li>
         </ul>
       </div>
 
+      <!-- Column 3: Perusahaan -->
       <div>
-        <h3 class="font-bold text-dark mb-4">Perusahaan</h3>
-        <ul class="space-y-3">
-          <li><a href="/tentang" class="text-text hover:text-primary transition-colors">Tentang Kami</a></li>
-          <li><a href="/portfolio" class="text-text hover:text-primary transition-colors">Portfolio</a></li>
-          <li><a href="/blog" class="text-text hover:text-primary transition-colors">Blog</a></li>
-          <li><a href="/kontak" class="text-text hover:text-primary transition-colors">Kontak</a></li>
+        <h3 class="font-bold text-dark text-lg mb-6">Perusahaan</h3>
+        <ul class="space-y-4">
+          <li>
+            <a href="/tentang" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="info" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>Tentang Kami</span>
+            </a>
+          </li>
+          <li>
+            <a href="/portfolio" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="briefcase-business" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>Portfolio</span>
+            </a>
+          </li>
+          <li>
+            <a href="/blog" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="book-open" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>Blog</span>
+            </a>
+          </li>
+          <li>
+            <a href="/kontak" class="group flex items-center gap-3 text-text hover:text-primary transition-colors duration-300">
+              <i data-lucide="message-circle" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-300"></i>
+              <span>Hubungi Kami</span>
+            </a>
+          </li>
         </ul>
       </div>
+      
+      <!-- Column 4: Kontak & Media Sosial -->
+      <div>
+        <h3 class="font-bold text-dark text-lg mb-6">Hubungi Kami</h3>
+        <ul class="space-y-4 mb-8">
+          <li class="flex items-start gap-3 text-text">
+            <i data-lucide="map-pin" class="w-5 h-5 text-primary mt-0.5 shrink-0"></i>
+            <span class="leading-relaxed">Sumbawa Besar, Nusa Tenggara Barat</span>
+          </li>
+          <li class="flex items-center gap-3 text-text">
+            <i data-lucide="mail" class="w-5 h-5 text-primary shrink-0"></i>
+            <a href="mailto:pinabae@gmail.com" class="hover:text-primary transition-colors">pinabae@gmail.com</a>
+          </li>
+          <li class="flex items-center gap-3 text-text">
+            <i data-lucide="phone" class="w-5 h-5 text-primary shrink-0"></i>
+            <a href="tel:+6282339265052" class="hover:text-primary transition-colors">+62-8233-9265-052</a>
+          </li>
+          <li class="flex items-start gap-3 text-text">
+            <i data-lucide="clock-3" class="w-5 h-5 text-primary mt-0.5 shrink-0"></i>
+            <span class="leading-relaxed">Senin &ndash; Sabtu<br>08.00 &ndash; 17.00 WITA</span>
+          </li>
+        </ul>
+        
+        <a href="https://wa.me/6282339265052" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 bg-primary text-white font-semibold rounded-full hover:bg-orange-600 hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md mb-8">
+          <i data-lucide="message-square" class="w-5 h-5"></i>
+          Konsultasi Gratis
+        </a>
+        
+        <div class="flex items-center gap-5">
+          <a href="#" class="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="Instagram">
+            <i data-lucide="instagram" class="w-6 h-6"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="LinkedIn">
+            <i data-lucide="linkedin" class="w-6 h-6"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="Facebook">
+            <i data-lucide="facebook" class="w-6 h-6"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="YouTube">
+            <i data-lucide="youtube" class="w-6 h-6"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="GitHub">
+            <i data-lucide="github" class="w-6 h-6"></i>
+          </a>
+        </div>
+      </div>
+      
     </div>
     
-    <div class="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-text">
-      <p>&copy; {currentYear} Pinabae Studio. All rights reserved.</p>
-      <div class="flex gap-4 mt-4 md:mt-0">
-        <a href="/privacy-policy" class="hover:text-dark">Privacy Policy</a>
-        <a href="/terms-conditions" class="hover:text-dark">Terms & Conditions</a>
+    <!-- Footer Bottom -->
+    <div class="border-t border-gray-200/80 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-500 gap-4">
+      <p>&copy; 2026 Pinabae Studio. All Rights Reserved.</p>
+      <div class="flex items-center gap-6">
+        <a href="/privacy-policy" class="hover:text-primary transition-colors">Privacy Policy</a>
+        <a href="/terms-conditions" class="hover:text-primary transition-colors">Terms & Conditions</a>
       </div>
     </div>
   </div>
 </footer>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Animate footer fade-up when visible
+  gsap.to('.footer-anim', {
+    scrollTrigger: {
+      trigger: '.footer-anim',
+      start: 'top 90%',
+      once: true
+    },
+    opacity: 1,
+    y: 0,
+    duration: 0.6,
+    ease: 'power2.out'
+  });
+</script>

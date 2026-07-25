@@ -1,0 +1,152 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Kelola Author | Admin Pinabae">
+  <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-dark">Author Blog</h1>
+      <p class="text-text">Kelola profil penulis artikel blog Anda.</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/admin/blog" class="px-4 py-2 bg-gray-100 text-dark rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Kembali ke Blog
+      </a>
+      <a href="/admin/blog/authors/create" class="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center gap-2 shadow-sm shadow-orange-500/20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        Tambah Author
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-border shadow-sm overflow-hidden" x-data="authorsData()">
+    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+      <div class="relative w-full md:w-64">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" x-model="searchQuery" placeholder="Cari author..." class="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+      </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-white border-b border-gray-100 text-sm">
+            <th class="py-3 px-6 font-semibold text-gray-600">Profil</th>
+            <th class="py-3 px-6 font-semibold text-gray-600">Jabatan</th>
+            <th class="py-3 px-6 font-semibold text-gray-600 text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-if="loading">
+            <tr>
+              <td colspan="3" class="py-8 text-center text-gray-400">
+                <svg class="animate-spin h-6 w-6 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Memuat data...
+              </td>
+            </tr>
+          </template>
+          
+          <template x-if="!loading && filteredAuthors.length === 0">
+            <tr>
+              <td colspan="3" class="py-8 text-center text-gray-500">
+                Belum ada data author. Silakan tambah baru.
+              </td>
+            </tr>
+          </template>
+          
+          <template x-for="author in filteredAuthors" :key="author.id">
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+              <td class="py-3 px-6">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200">
+                    <template x-if="author.photo_url">
+                      <img :src="author.photo_url" :alt="author.name" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!author.photo_url">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </template>
+                  </div>
+                  <div>
+                    <div class="font-bold text-dark" x-text="author.name"></div>
+                    <div class="text-sm text-gray-500" x-text="author.email"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-3 px-6 text-gray-600" x-text="author.position"></td>
+              <td class="py-3 px-6 text-right">
+                <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <a :href="`/admin/blog/authors/edit/${author.id}`" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                  </a>
+                  <button @click="deleteAuthor(author.id)" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase } from '../../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    window.Alpine.data('authorsData', () => ({
+      authors: [],
+      searchQuery: '',
+      loading: true,
+
+      async init() {
+        this.fetchAuthors();
+      },
+
+      async fetchAuthors() {
+        this.loading = true;
+        try {
+          const { data, error } = await supabase
+            .from('blog_authors')
+            .select('*')
+            .order('name', { ascending: true });
+          
+          if (error) throw error;
+          if (data) this.authors = data;
+        } catch (error) {
+          console.error('Error fetching authors:', error);
+          alert('Gagal mengambil data author. Pastikan tabel blog_authors sudah dibuat.');
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      get filteredAuthors() {
+        if (!this.searchQuery) return this.authors;
+        const q = this.searchQuery.toLowerCase();
+        return this.authors.filter((a: any) => 
+          a.name.toLowerCase().includes(q) || 
+          (a.position && a.position.toLowerCase().includes(q))
+        );
+      },
+
+      async deleteAuthor(id: string) {
+        if (!confirm('Apakah Anda yakin ingin menghapus author ini?')) return;
+        
+        try {
+          const { error } = await supabase.from('blog_authors').delete().eq('id', id);
+          if (error) throw error;
+          
+          this.authors = this.authors.filter((a: any) => a.id !== id);
+          alert('Author berhasil dihapus.');
+        } catch (error) {
+          console.error('Error deleting author:', error);
+          alert('Gagal menghapus author.');
+        }
+      }
+    }));
+  });
+</script>

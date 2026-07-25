@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 
+import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
@@ -11,63 +12,556 @@ const { slug } = Astro.params;
 
 const { data: post, error } = await supabase
   .from('blog_posts')
-  .select('*, categories(name, slug)')
+  .select(`
+    *, 
+    categories(name, slug, badge_color),
+    blog_authors(name, position, photo_url, biography, linkedin_url, instagram_url, github_url, website_url),
+    post_tags(blog_tags(name, slug))
+  `)
   .eq('slug', slug)
   .eq('status', 'published')
   .single();
 
 if (error || !post) {
-  return Astro.redirect('/404');
+  console.error("BLOG FETCH ERROR:", error);
+  return new Response(`Error fetching blog post: ${JSON.stringify(error || 'Post not found')}`, { status: 404 });
 }
+
+// Fetch related articles (same category, different post)
+let relatedPosts = [];
+if (post.category_id) {
+  const { data: relatedData } = await supabase
+    .from('blog_posts')
+    .select('title, slug, excerpt, featured_image, published_at, categories(name, badge_color)')
+    .eq('status', 'published')
+    .eq('category_id', post.category_id)
+    .neq('id', post.id)
+    .order('published_at', { ascending: false })
+    .limit(3);
+    
+  if (relatedData) relatedPosts = relatedData;
+}
+
+const seoTitle = post.meta_title || `${post.title} | Blog Pinabae Studio`;
+const seoDescription = post.meta_description || post.excerpt;
+const author = post.blog_authors;
+const tags = post.post_tags ? post.post_tags.map((pt: any) => pt.blog_tags) : [];
 ---
 
-<Layout title={`${post.seo_title || post.title} | Blog Pinabae Studio`} description={post.seo_description || post.excerpt}>
-  <Navbar />
+<Layout title={seoTitle} description={seoDescription}>
+  <!-- Sticky Navbar (Specific for Blog Post) -->
+  <header class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-transform duration-300 transform" id="blog-navbar">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="/blog" class="text-gray-500 hover:text-primary p-2 rounded-full hover:bg-gray-100 transition-colors" title="Kembali ke Blog">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <div class="hidden md:block">
+          <h2 class="text-sm font-bold text-dark line-clamp-1">{post.title}</h2>
+          <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+            {author && <span>Oleh {author.name}</span>}
+            {author && <span>&bull;</span>}
+            <span>{post.estimated_read_time || 3} min read</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button class="text-gray-500 hover:text-primary p-2 rounded-full hover:bg-gray-100 transition-colors" title="Share" id="share-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Reading Progress Bar -->
+    <div class="h-1 bg-gray-100 w-full absolute bottom-0 left-0">
+      <div class="h-full bg-primary w-0" id="reading-progress"></div>
+    </div>
+  </header>
   
-  <main class="flex-grow pt-32">
+  <main class="flex-grow pt-24 pb-20">
     <article>
-      <Section class="pb-10">
-        <div class="max-w-3xl mx-auto text-center">
-          <a href="/blog" class="text-gray-500 hover:text-primary mb-8 inline-flex items-center gap-2 text-sm font-medium transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            Kembali ke Blog
-          </a>
+      <!-- Hero Section -->
+      <Section class="pb-10 pt-10">
+        <div class="max-w-4xl mx-auto">
           
-          <div class="flex items-center justify-center gap-3 text-sm font-semibold text-gray-500 uppercase tracking-wider mb-6 header-anim opacity-0 translate-y-4">
-            {post.categories && <span class="text-primary">{post.categories.name}</span>}
-            {post.published_at && (
-              <>
-                <span>&bull;</span>
-                <span>{new Date(post.published_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              </>
+          <div class="flex items-center gap-3 text-sm font-semibold mb-6 header-anim opacity-0 translate-y-4">
+            {post.categories && (
+              <a href={`/blog/category/${post.categories.slug}`} class="px-3 py-1 rounded-full bg-gray-100 text-dark hover:bg-gray-200 transition-colors">
+                {post.categories.name}
+              </a>
             )}
+            <span class="text-gray-400">&bull;</span>
+            <span class="text-gray-500">{new Date(post.published_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
           </div>
           
-          <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold text-dark mb-10 leading-tight header-anim opacity-0 translate-y-4 text-balance">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-dark mb-6 leading-tight header-anim opacity-0 translate-y-4 text-balance tracking-tight">
             {post.title}
           </h1>
-          
+
+          {post.excerpt && (
+            <p class="text-xl md:text-2xl text-gray-500 leading-relaxed mb-8 header-anim opacity-0 translate-y-4">
+              {post.excerpt}
+            </p>
+          )}
+
+          <!-- Author Info -->
+          {author && (
+            <div class="flex items-center gap-4 mb-10 header-anim opacity-0 translate-y-4">
+              {author.photo_url ? (
+                <img src={author.photo_url} alt={author.name} class="w-12 h-12 rounded-full object-cover border border-gray-200" />
+              ) : (
+                <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
+                  {author.name.charAt(0)}
+                </div>
+              )}
+              <div>
+                <div class="font-bold text-dark">{author.name}</div>
+                <div class="text-sm text-gray-500">{author.position} &bull; {post.estimated_read_time || 3} min read</div>
+              </div>
+            </div>
+          )}
           
         </div>
         
         {post.featured_image && (
-          <div class="max-w-5xl mx-auto aspect-video rounded-3xl overflow-hidden shadow-xl mb-16 header-anim opacity-0 translate-y-8">
-            <img src={post.featured_image} alt={post.title} class="w-full h-full object-cover" />
+          <div class="max-w-5xl mx-auto aspect-video rounded-2xl md:rounded-3xl overflow-hidden shadow-xl mb-16 header-anim opacity-0 translate-y-8 relative group">
+            <img src={post.featured_image} alt={post.alt_featured_image || post.title} class="w-full h-full object-cover" />
           </div>
         )}
-        
-        <div class="max-w-3xl mx-auto prose prose-lg prose-orange text-text content-anim opacity-0 translate-y-8" set:html={post.content}>
+
+        <!-- Main Layout with TOC -->
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20">
+          
+          <!-- Article Content -->
+          <div class="flex-1 min-w-0">
+            
+            <!-- Key Takeaways -->
+            {post.key_takeaways && post.key_takeaways.length > 0 && (
+              <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 md:p-8 mb-12 content-anim opacity-0 translate-y-8">
+                <h3 class="text-lg font-bold text-dark mb-4 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Key Takeaways
+                </h3>
+                <ul class="space-y-3">
+                  {post.key_takeaways.map((tk: string) => (
+                    <li class="flex items-start gap-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span class="text-gray-700 font-medium">{tk}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <!-- TOC Mobile -->
+            <div class="lg:hidden mb-10 bg-gray-50 border border-gray-100 rounded-xl p-6 content-anim opacity-0 translate-y-8" id="toc-mobile-container" style="display: none;">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4">Daftar Isi</h3>
+              <nav id="toc-mobile" class="space-y-2 text-sm font-medium text-dark"></nav>
+            </div>
+
+            <!-- Content Body -->
+            <div class="prose prose-lg md:prose-xl prose-orange text-text content-anim opacity-0 translate-y-8 max-w-none" id="article-content" set:html={post.content}>
+            </div>
+
+            <!-- Tags -->
+            {tags.length > 0 && (
+              <div class="mt-12 pt-8 border-t border-gray-100 flex flex-wrap gap-2 content-anim opacity-0">
+                <span class="text-sm font-bold text-dark mr-2 self-center">Tags:</span>
+                {tags.map((t: any) => (
+                  <a href={`/blog/tag/${t.slug}`} class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors">
+                    {t.name}
+                  </a>
+                ))}
+              </div>
+            )}
+
+            <!-- Middle/Footer CTA -->
+            {post.cta_enabled && (
+              <div class="mt-16 bg-dark text-white rounded-3xl p-8 md:p-12 text-center content-anim opacity-0 relative overflow-hidden group">
+                <!-- Abstract BG -->
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-dark to-dark"></div>
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+                
+                <div class="relative z-10 max-w-2xl mx-auto">
+                  <h3 class="text-2xl md:text-3xl font-bold mb-4">Siap Melesatkan Bisnis Anda?</h3>
+                  <p class="text-gray-300 mb-8 text-lg">Konsultasikan kebutuhan digital Anda dengan tim ahli kami. Gratis 30 menit konsultasi untuk strategi awal.</p>
+                  <a href="https://wa.me/6281234567890" target="_blank" class="inline-flex px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-orange-600 transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+                    Mulai Konsultasi Gratis
+                  </a>
+                </div>
+              </div>
+            )}
+
+            <!-- Author Box -->
+            {author && (
+              <div class="mt-16 bg-gray-50 border border-gray-100 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start content-anim opacity-0">
+                {author.photo_url ? (
+                  <img src={author.photo_url} alt={author.name} class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 border-white shadow-sm shrink-0" />
+                ) : (
+                  <div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-3xl shrink-0">
+                    {author.name.charAt(0)}
+                  </div>
+                )}
+                <div class="flex-1">
+                  <div class="flex flex-wrap items-center gap-3 mb-2">
+                    <h3 class="text-xl font-bold text-dark">{author.name}</h3>
+                    <span class="text-sm font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded-md">{author.position}</span>
+                  </div>
+                  <p class="text-gray-600 mb-4 leading-relaxed">{author.biography || `Penulis konten di Pinabae Studio. Berpengalaman di bidang ${author.position}.`}</p>
+                  <div class="flex gap-3">
+                    {author.linkedin_url && (
+                      <a href={author.linkedin_url} target="_blank" class="text-gray-400 hover:text-[#0A66C2] transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg></a>
+                    )}
+                    {author.instagram_url && (
+                      <a href={author.instagram_url} target="_blank" class="text-gray-400 hover:text-[#E4405F] transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+                    )}
+                    {author.website_url && (
+                      <a href={author.website_url} target="_blank" class="text-gray-400 hover:text-dark transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          <!-- Sidebar (Sticky TOC) -->
+          <div class="hidden lg:block w-72 shrink-0">
+            <div class="sticky top-28 content-anim opacity-0" id="toc-desktop-container" style="display: none;">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-gray-900 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+                Daftar Isi
+              </h3>
+              <nav id="toc-desktop" class="space-y-3 text-sm font-medium border-l-2 border-gray-100 pl-4"></nav>
+            </div>
+          </div>
+
         </div>
       </Section>
     </article>
+
+    <!-- Related Articles -->
+    {relatedPosts.length > 0 && (
+      <Section class="bg-gray-50 border-t border-gray-100 py-20 mt-10">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-3xl font-bold text-dark mb-10 text-center">Artikel Terkait</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {relatedPosts.map((rp: any) => (
+              <a href={`/blog/${rp.slug}`} class="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div class="aspect-video bg-gray-100 overflow-hidden relative">
+                  {rp.featured_image ? (
+                    <img src={rp.featured_image} alt={rp.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  ) : (
+                    <div class="w-full h-full flex items-center justify-center text-gray-300"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>
+                  )}
+                  {rp.categories && (
+                    <span class="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm text-dark text-xs font-bold rounded-full">{rp.categories.name}</span>
+                  )}
+                </div>
+                <div class="p-6 flex flex-col flex-grow">
+                  <h3 class="text-xl font-bold text-dark mb-3 line-clamp-2 group-hover:text-primary transition-colors">{rp.title}</h3>
+                  <p class="text-gray-500 text-sm mb-4 line-clamp-2 flex-grow">{rp.excerpt}</p>
+                  <span class="text-xs font-semibold text-gray-400 mt-auto">{new Date(rp.published_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </Section>
+    )}
   </main>
 
   <Footer />
 </Layout>
 
+<style is:global>
+  /* Base Prose Customization for Readability */
+  .prose {
+    font-family: 'Inter', sans-serif;
+    color: #374151; /* gray-700 */
+    line-height: 1.8;
+  }
+  .prose p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+  }
+  .prose h2, .prose h3, .prose h4 {
+    color: #111827; /* gray-900 */
+    font-weight: 800;
+    scroll-margin-top: 100px; /* For TOC clicking */
+    letter-spacing: -0.025em;
+  }
+  .prose h2 {
+    font-size: 1.875rem;
+    margin-top: 2.5em;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .prose h3 {
+    font-size: 1.5rem;
+    margin-top: 2em;
+    margin-bottom: 0.75em;
+  }
+  
+  .prose a {
+    color: #F97316; /* primary */
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(249,115,22, 0.2);
+    transition: all 0.2s;
+  }
+  .prose a:hover {
+    border-bottom-color: rgba(249,115,22, 1);
+  }
+
+  .prose img {
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    margin-top: 2.5em;
+    margin-bottom: 2.5em;
+  }
+
+  .prose blockquote {
+    font-style: italic;
+    font-weight: 500;
+    color: #4b5563;
+    border-left: 4px solid #F97316;
+    background-color: #fafaf9;
+    padding: 1.5em;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 2em 0;
+  }
+  .prose blockquote p:first-of-type::before { content: none; }
+  .prose blockquote p:last-of-type::after { content: none; }
+
+  /* Lists */
+  .prose ul > li {
+    position: relative;
+    padding-left: 1.5em;
+  }
+  .prose ul > li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 0.375em;
+    height: 0.375em;
+    border-radius: 50%;
+    background-color: #F97316;
+  }
+
+  /* Table styles generated by Tiptap */
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2em 0;
+    font-size: 0.875em;
+    overflow-x: auto;
+    display: block;
+  }
+  @media (min-width: 768px) {
+    .prose table { display: table; }
+  }
+  .prose th {
+    background-color: #f9fafb;
+    font-weight: 700;
+    text-align: left;
+    padding: 1em;
+    border: 1px solid #e5e7eb;
+    color: #111827;
+  }
+  .prose td {
+    padding: 1em;
+    border: 1px solid #e5e7eb;
+  }
+  .prose tr:nth-child(even) { background-color: #f9fafb; }
+
+  /* Callouts */
+  .custom-callout {
+    padding: 1.5em;
+    border-radius: 1rem;
+    margin: 2em 0;
+  }
+  .custom-callout p {
+    margin: 0 !important;
+  }
+  .callout-info {
+    background-color: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    color: #1e3a8a;
+  }
+  .callout-warning {
+    background-color: #fff7ed;
+    border-left: 4px solid #f97316;
+    color: #9a3412;
+  }
+
+  /* Task Lists */
+  .prose ul[data-type="taskList"] {
+    list-style: none;
+    padding-left: 0;
+  }
+  .prose ul[data-type="taskList"] li::before {
+    display: none;
+  }
+  .prose ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+    padding-left: 0;
+    margin-bottom: 0.5em;
+  }
+  .prose ul[data-type="taskList"] li > label {
+    margin-right: 0.75em;
+    margin-top: 0.25em;
+  }
+  .prose ul[data-type="taskList"] li > label input {
+    accent-color: #F97316;
+    width: 1.1em;
+    height: 1.1em;
+    cursor: pointer;
+  }
+
+  /* TOC Styles */
+  .toc-link {
+    display: block;
+    color: #6b7280;
+    text-decoration: none;
+    transition: all 0.2s;
+    line-height: 1.5;
+    padding-left: 1rem;
+    border-left: 2px solid transparent;
+    margin-left: -2px; /* overlap parent border */
+  }
+  .toc-link:hover {
+    color: #111827;
+  }
+  .toc-link.active {
+    color: #F97316;
+    border-left-color: #F97316;
+    font-weight: 700;
+  }
+  .toc-h2 {
+    padding-left: 1rem;
+  }
+  .toc-h3 {
+    padding-left: 2rem;
+    font-size: 0.9em;
+  }
+</style>
+
 <script>
   import gsap from 'gsap';
   
+  // Animation on load
   gsap.to('.header-anim', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', stagger: 0.1 });
-  gsap.to('.content-anim', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.4 });
+  gsap.to('.content-anim', { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.4, stagger: 0.1 });
+
+  // Generate Table of Contents
+  document.addEventListener('DOMContentLoaded', () => {
+    const content = document.getElementById('article-content');
+    if (!content) return;
+
+    const headings = content.querySelectorAll('h2, h3');
+    const tocDesktop = document.getElementById('toc-desktop');
+    const tocMobile = document.getElementById('toc-mobile');
+    const tocDesktopContainer = document.getElementById('toc-desktop-container');
+    const tocMobileContainer = document.getElementById('toc-mobile-container');
+    
+    if (headings.length > 0) {
+      if (tocDesktop) tocDesktopContainer.style.display = 'block';
+      if (tocMobile) tocMobileContainer.style.display = 'block';
+
+      let tocHtml = '';
+      
+      headings.forEach((heading, index) => {
+        // Add ID if missing
+        if (!heading.id) {
+          heading.id = `heading-${index}`;
+        }
+        
+        const level = heading.tagName.toLowerCase();
+        const text = heading.textContent;
+        const id = heading.id;
+        
+        tocHtml += `<a href="#${id}" class="toc-link toc-${level}">${text}</a>\n`;
+      });
+
+      if (tocDesktop) tocDesktop.innerHTML = tocHtml;
+      if (tocMobile) tocMobile.innerHTML = tocHtml;
+    }
+
+    // Smooth Scroll for TOC links
+    document.querySelectorAll('.toc-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          const y = targetElement.getBoundingClientRect().top + window.pageYOffset - 100; // offset for sticky nav
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Intersection Observer for highlighting active TOC link
+    const observerOptions = {
+      root: null,
+      rootMargin: '-100px 0px -80% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          document.querySelectorAll('.toc-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    headings.forEach(heading => observer.observe(heading));
+  });
+
+  // Reading Progress & Navbar Logic
+  document.addEventListener('scroll', () => {
+    const navbar = document.getElementById('blog-navbar');
+    const progressBar = document.getElementById('reading-progress');
+    
+    // Progress Bar Calculation
+    const scrollTotal = document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrollRatio = scrollTotal / height;
+    
+    if (progressBar) {
+      progressBar.style.width = `${scrollRatio * 100}%`;
+    }
+
+    // Hide/Show navbar based on scroll direction could be added here, 
+    // but for now we just keep it sticky with a shadow
+    if (scrollTotal > 100) {
+      navbar?.classList.add('shadow-md');
+    } else {
+      navbar?.classList.remove('shadow-md');
+    }
+  });
+
+  // Share functionality
+  document.getElementById('share-btn')?.addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({
+        title: document.title,
+        url: window.location.href
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        alert('URL disalin ke clipboard!');
+      });
+    }
+  });
 </script>

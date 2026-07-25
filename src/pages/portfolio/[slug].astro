@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 
+import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
@@ -39,7 +40,7 @@ if (error || !item) {
 
         {item.image_url && (
           <div class="aspect-video w-full rounded-3xl overflow-hidden mb-12 shadow-2xl content-anim opacity-0 translate-y-8">
-            <img src={item.image_url} alt={item.title} class="w-full h-full object-cover" />
+            <Image src={item.image_url} alt={item.title} width={1200} height={800} class="w-full h-full object-cover" loading="eager" fetchpriority="high" />
           </div>
         )}
 
