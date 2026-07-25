@@ -1,12 +1,12 @@
 ---
 import { Image } from 'astro:assets';
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import Section from '../components/ui/Section.astro';
-import Button from '../components/ui/Button.astro';
-import Card from '../components/ui/Card.astro';
-import { supabase } from '../lib/supabase';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import Section from '../../components/ui/Section.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+import { supabase } from '../../lib/supabase';
 
 let teamMembers = [];
 try {
@@ -20,7 +20,7 @@ try {
 }
 ---
 
-<Layout title="Tentang Kami | Pinabae Studio" description="Pinabae Studio adalah digital agency asal Sumbawa yang membantu bisnis membangun kehadiran digital profesional.">
+<Layout title="About Us | Pinabae Studio" description="Pinabae Studio adalah digital agency asal Sumbawa yang membantu bisnis membangun kehadiran digital profesional.">
   <Navbar />
   
   <main class="flex-grow pt-32">

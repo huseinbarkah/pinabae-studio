@@ -13,4 +13,11 @@ export default defineConfig({
   image: {
     domains: ['fwrmljqxfbiykncadfqo.supabase.co'],
   },
+  i18n: {
+    defaultLocale: 'id',
+    locales: ['id', 'en'],
+    routing: {
+      prefixDefaultLocale: false
+    }
+  }
 });

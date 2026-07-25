@@ -1,23 +1,31 @@
 ---
 import '../styles/global.css';
+import WhatsAppBubble from '../components/WhatsAppBubble.astro';
+import { ClientRouter } from 'astro:transitions';
+
+import { getLangFromUrl } from '../i18n/utils';
 
 interface Props {
 	title?: string;
 	description?: string;
+	lang?: string;
 }
 
+const urlLang = getLangFromUrl(Astro.url);
 const { 
 	title = "Pinabae Studio | Jasa Pembuatan Website Profesional", 
-	description = "Pinabae Studio membantu UMKM, startup, dan personal brand membangun kredibilitas melalui website modern, cepat, dan SEO Friendly." 
+	description = "Pinabae Studio membantu UMKM, startup, dan personal brand membangun kredibilitas melalui website modern, cepat, dan SEO Friendly.",
+	lang = urlLang
 } = Astro.props;
 ---
 <!doctype html>
-<html lang="id" class="scroll-smooth">
+<html lang={lang} class="scroll-smooth">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/png" href="/logo.png" />
 		<meta name="generator" content={Astro.generator} />
+		<ClientRouter />
 		
 		<title>{title}</title>
 		<meta name="description" content={description} />
@@ -44,7 +52,10 @@ const {
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap">
-		<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+		<noscript>
+			<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+		</noscript>
 		
 		<!-- Schema.org JSON-LD -->
 		<script type="application/ld+json" set:html={`
@@ -68,20 +79,46 @@ const {
 	</head>
 	<body class="flex flex-col min-h-screen">
 		<slot />
+		<WhatsAppBubble />
 		
-		<!-- Smooth Scrolling (Lenis) & Lucide Icons -->
+		<!-- Smooth Scrolling (Lenis), Lucide Icons, & Service Worker -->
 		<script>
 		  import Lenis from 'lenis';
-		  import { createIcons, icons } from 'lucide';
+		  import { 
+		    createIcons, MapPin, Sparkles, Target, Flag, CheckCircle2, Lightbulb, Handshake, ShieldCheck, 
+		    TrendingUp, MessageCircle, ClipboardList, PenTool, Code2, Rocket, LifeBuoy, User, Users, 
+		    ArrowRight, CheckCircle, Box, Building2, LayoutTemplate, BriefcaseBusiness, BookOpen, Search, 
+		    Info, Mail, Phone, Clock3, MessageSquare, 
+		    UserSquare, UserSearch, SearchX, ShieldAlert, TrendingDown, MonitorOff, ChevronDown, Menu, X, Briefcase
+		  } from 'lucide';
 
-		  const lenis = new Lenis({
-			autoRaf: true,
+		  document.addEventListener('astro:page-load', () => {
+		    // Initialize Lenis
+		    const lenis = new Lenis({
+			  autoRaf: true,
+		    });
+
+		    // Initialize Lucide with specific icons (Tree-shaking)
+		    createIcons({
+			  icons: {
+			    MapPin, Sparkles, Target, Flag, CheckCircle2, Lightbulb, Handshake, ShieldCheck, 
+			    TrendingUp, MessageCircle, ClipboardList, PenTool, Code2, Rocket, LifeBuoy, User, Users, 
+			    ArrowRight, CheckCircle, Box, Building2, LayoutTemplate, BriefcaseBusiness, BookOpen, Search, 
+			    Info, Mail, Phone, Clock3, MessageSquare, 
+			    UserSquare, UserSearch, SearchX, ShieldAlert, TrendingDown, MonitorOff, ChevronDown, Menu, X, Briefcase
+			  },
+			  nameAttr: 'data-lucide'
+		    });
 		  });
 
-		  createIcons({
-			icons,
-			nameAttr: 'data-lucide'
-		  });
+		  // Register Service Worker (only once)
+		  if ('serviceWorker' in navigator) {
+		    window.addEventListener('load', () => {
+		      navigator.serviceWorker.register('/sw.js').catch(err => {
+		        console.log('ServiceWorker registration failed: ', err);
+		      });
+		    });
+		  }
 		</script>
 	</body>
 </html>
