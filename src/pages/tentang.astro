@@ -261,7 +261,7 @@ try {
                 
                 <div class="w-full aspect-[4/5] rounded-xl bg-gray-100 mb-5 overflow-hidden relative">
                   {member.photo_url ? (
-                    <Image src={member.photo_url} alt={member.name} width={400} height={500} class="w-full h-full object-cover grayscale opacity-85 transition-all duration-500 ease-out group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-[1.03]" loading="lazy" />
+                    <Image src={member.photo_url} alt={member.name} width={400} height={500} class="w-full h-full object-cover grayscale opacity-85 transition-all duration-500 ease-out group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-[1.03]" loading="lazy" decoding="async" />
                   ) : (
                     <div class="w-full h-full flex items-center justify-center text-gray-300">
                       <i data-lucide="user" class="w-16 h-16"></i>

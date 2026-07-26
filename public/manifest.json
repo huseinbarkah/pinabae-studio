@@ -1,0 +1,21 @@
+{
+  "name": "Pinabae Studio",
+  "short_name": "Pinabae",
+  "description": "Jasa Digital Agency di Sumbawa yang membantu UMKM, bisnis, dan personal brand meningkatkan kredibilitas, traffic, dan penjualan melalui website modern dan strategi digital.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#F97316",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

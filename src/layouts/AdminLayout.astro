@@ -15,6 +15,9 @@ const { title = "Pinabae Studio CMS" } = Astro.props;
 		<link rel="icon" type="image/png" href="/logo.png" />
 		<title>{title}</title>
 		
+		<!-- Prevent Indexing of Admin Pages -->
+		<meta name="robots" content="noindex, nofollow" />
+		
 		<!-- Google Fonts: Plus Jakarta Sans -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

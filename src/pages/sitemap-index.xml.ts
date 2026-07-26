@@ -4,8 +4,8 @@ import { supabase } from '../lib/supabase';
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
-  // Gunakan domain asli dari request, atau fallback ke default
-  const siteUrl = new URL(request.url).origin;
+  // Gunakan domain utama
+  const siteUrl = 'https://pinabae.site';
 
   try {
     // Ambil data dinamis dari Supabase

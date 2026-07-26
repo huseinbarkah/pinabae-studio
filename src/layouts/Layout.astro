@@ -2,8 +2,8 @@
 import '../styles/global.css';
 import WhatsAppBubble from '../components/WhatsAppBubble.astro';
 import { ClientRouter } from 'astro:transitions';
-
 import { getLangFromUrl } from '../i18n/utils';
+import { supabase } from '../lib/supabase';
 
 interface Props {
 	title?: string;
@@ -12,30 +12,47 @@ interface Props {
 	image?: string;
 	schema?: string;
 	type?: string;
+	noindex?: boolean;
+	ogTitle?: string;
+	ogDescription?: string;
+	hideWhatsApp?: boolean;
 }
 
 const urlLang = getLangFromUrl(Astro.url);
+
+// Ambil settings dari database untuk verifikasi
+const { data: settings } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+
 const { 
-	title = "Pinabae Studio | Jasa Pembuatan Website Profesional di Sumbawa", 
-	description = "Pinabae Studio membantu UMKM, startup, dan personal brand membangun kredibilitas melalui website modern, cepat, dan SEO Friendly di Sumbawa, NTB.",
+	title = settings?.site_title || "Pinabae Studio | Jasa Pembuatan Website Profesional", 
+	description = settings?.site_description || "Jasa Digital Agency di Sumbawa yang membantu UMKM, bisnis, dan personal brand meningkatkan kredibilitas, traffic, dan penjualan melalui website modern dan strategi digital.",
 	lang = urlLang,
-	image = "/logo.png",
+	image = "/og-image.jpg",
 	schema,
-	type = "website"
+	type = "website",
+	noindex = false,
+	ogTitle,
+	ogDescription,
+	hideWhatsApp = false
 } = Astro.props;
+
+// Gunakan canonical URL dengan domain utama
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://pinabae.site').href;
+const resolvedImageWithDomain = new URL(image, Astro.site || 'https://pinabae.site').href;
 ---
 <!doctype html>
 <html lang={lang} class="scroll-smooth">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/png" href="/logo.png" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="manifest" href="/manifest.json" />
 		<meta name="generator" content={Astro.generator} />
 		<ClientRouter />
 		
 		<title>{title}</title>
 		<meta name="description" content={description} />
-		<link rel="canonical" href={Astro.url.href} />
+		<link rel="canonical" href={canonicalURL} />
 		
 		<!-- Local SEO Geo Tags -->
 		<meta name="geo.region" content="ID-NB" />
@@ -44,21 +61,54 @@ const {
 		<meta name="ICBM" content="-8.49858, 117.43213" />
 
 		<!-- Open Graph / Facebook -->
+		<meta property="og:site_name" content="Pinabae Studio" />
 		<meta property="og:type" content={type} />
-		<meta property="og:url" content={Astro.url.href} />
-		<meta property="og:title" content={title} />
-		<meta property="og:description" content={description} />
-		<meta property="og:image" content={new URL(image, Astro.url)} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={ogTitle || title} />
+		<meta property="og:description" content={ogDescription || description} />
+		<meta property="og:image" content={resolvedImageWithDomain} />
 		
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={Astro.url.href} />
-		<meta property="twitter:title" content={title} />
-		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content={new URL(image, Astro.url)} />
+		<meta property="twitter:url" content={canonicalURL} />
+		<meta property="twitter:title" content={ogTitle || title} />
+		<meta property="twitter:description" content={ogDescription || description} />
+		<meta property="twitter:image" content={resolvedImageWithDomain} />
 		
-		<!-- SEO Basics -->
-		<meta name="robots" content="index, follow" />
+		<!-- SEO Robots -->
+		{noindex ? (
+			<meta name="robots" content="noindex, nofollow" />
+		) : (
+			<meta name="robots" content="index, follow" />
+		)}
+		
+		<!-- Verifikasi Search Console & Bing -->
+		{settings?.gsc_verification && <meta name="google-site-verification" content={settings.gsc_verification} />}
+		{settings?.bing_verification && <meta name="msvalidate.01" content={settings.bing_verification} />}
+
+		<!-- Google Analytics 4 -->
+		{settings?.google_analytics && (
+			<>
+				<script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${settings.google_analytics}`} async></script>
+				<script is:inline define:vars={{ gaId: settings.google_analytics }}>
+					window.dataLayer = window.dataLayer || [];
+					function gtag(){dataLayer.push(arguments);}
+					gtag('js', new Date());
+					gtag('config', gaId);
+				</script>
+			</>
+		)}
+
+		<!-- Google Tag Manager -->
+		{settings?.gtm_code && (
+			<script is:inline define:vars={{ gtmId: settings.gtm_code }}>
+				(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+				new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+				j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+				'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+				})(window,document,'script','dataLayer',gtmId);
+			</script>
+		)}
 		
 		<!-- Google Fonts: Plus Jakarta Sans -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,20 +125,18 @@ const {
 		) : (
 			<script type="application/ld+json" set:html={`
 			{
-			  "@context": "https://schema.org",
-			  "@type": "LocalBusiness",
-			  "name": "Pinabae Studio",
-			  "image": "https://pinabae-studio.vercel.app/logo.png",
-			  "url": "https://pinabae-studio.vercel.app/",
-			  "telephone": "+6282339265052",
-			  "address": {
-			    "@type": "PostalAddress",
-			    "addressLocality": "Sumbawa Besar",
-			    "addressRegion": "Nusa Tenggara Barat",
-			    "addressCountry": "ID"
-			  },
-			  "description": "Jasa pembuatan website profesional dan web developer di Sumbawa untuk membantu UMKM tumbuh di era digital.",
-			  "priceRange": "$$"
+			 "@context":"https://schema.org",
+			 "@type":"ProfessionalService",
+			 "name":"Pinabae Studio",
+			 "url":"https://pinabae.site",
+			 "logo":"https://pinabae.site/logo.png",
+			 "description":"Digital Agency di Sumbawa yang membantu bisnis berkembang melalui website profesional dan strategi digital.",
+			 "address":{
+			   "@type":"PostalAddress",
+			   "addressLocality":"Sumbawa Besar",
+			   "addressRegion":"Nusa Tenggara Barat",
+			   "addressCountry":"ID"
+			 }
 			}
 			`} />
 		)}
@@ -97,13 +145,19 @@ const {
 		  "@context": "https://schema.org",
 		  "@type": "WebSite",
 		  "name": "Pinabae Studio",
-		  "url": "https://pinabae-studio.vercel.app/"
+		  "url": "https://pinabae.site/"
 		}
 		`} />
 	</head>
 	<body class="flex flex-col min-h-screen">
+		<!-- Google Tag Manager (noscript) -->
+		{settings?.gtm_code && (
+			<noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${settings.gtm_code}`}
+			height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		)}
+		
 		<slot />
-		<WhatsAppBubble />
+		{!hideWhatsApp && <WhatsAppBubble />}
 		
 		<!-- Smooth Scrolling (Lenis), Lucide Icons, & Service Worker -->
 		<script>

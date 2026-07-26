@@ -137,6 +137,23 @@ if (!initialPost) {
             <label class="block text-sm font-bold text-dark mb-1">Canonical URL</label>
             <input type="url" x-model="post.canonical_url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none">
           </div>
+          <div class="pt-4 border-t border-gray-100">
+            <h3 class="text-md font-bold text-dark mb-3">Open Graph (Sosial Media)</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-bold text-dark mb-1">OG Title</label>
+                <input type="text" x-model="post.og_title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Opsional. Default: SEO Title">
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-dark mb-1">OG Description</label>
+                <textarea x-model="post.og_description" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Opsional. Default: SEO Description"></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-dark mb-1">OG Image URL</label>
+                <input type="url" x-model="post.og_image" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Opsional. Default: Featured Image">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -334,6 +351,8 @@ if (!initialPost) {
         meta_description: '',
         meta_keywords: '',
         canonical_url: '',
+        og_title: '',
+        og_description: '',
         og_image: '',
         estimated_read_time: 3,
         cta_enabled: true
@@ -438,6 +457,8 @@ if (!initialPost) {
             meta_description: this.post.meta_description,
             meta_keywords: this.post.meta_keywords,
             canonical_url: this.post.canonical_url,
+            og_title: this.post.og_title,
+            og_description: this.post.og_description,
             og_image: this.post.og_image,
             estimated_read_time: this.post.estimated_read_time,
             cta_enabled: this.post.cta_enabled,

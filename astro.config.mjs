@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://pinabae.site',
   adapter: vercel(),
   integrations: [alpinejs()],
   vite: {

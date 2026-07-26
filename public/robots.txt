@@ -2,6 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
-Disallow: /_astro/
 
-Sitemap: https://pinabaestudio.com/sitemap.xml
+Sitemap: https://pinabae.site/sitemap-index.xml
