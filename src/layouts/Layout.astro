@@ -9,13 +9,19 @@ interface Props {
 	title?: string;
 	description?: string;
 	lang?: string;
+	image?: string;
+	schema?: string;
+	type?: string;
 }
 
 const urlLang = getLangFromUrl(Astro.url);
 const { 
-	title = "Pinabae Studio | Jasa Pembuatan Website Profesional", 
-	description = "Pinabae Studio membantu UMKM, startup, dan personal brand membangun kredibilitas melalui website modern, cepat, dan SEO Friendly.",
-	lang = urlLang
+	title = "Pinabae Studio | Jasa Pembuatan Website Profesional di Sumbawa", 
+	description = "Pinabae Studio membantu UMKM, startup, dan personal brand membangun kredibilitas melalui website modern, cepat, dan SEO Friendly di Sumbawa, NTB.",
+	lang = urlLang,
+	image = "/logo.png",
+	schema,
+	type = "website"
 } = Astro.props;
 ---
 <!doctype html>
@@ -31,19 +37,25 @@ const {
 		<meta name="description" content={description} />
 		<link rel="canonical" href={Astro.url.href} />
 		
+		<!-- Local SEO Geo Tags -->
+		<meta name="geo.region" content="ID-NB" />
+		<meta name="geo.placename" content="Sumbawa Besar, Nusa Tenggara Barat" />
+		<meta name="geo.position" content="-8.49858;117.43213" />
+		<meta name="ICBM" content="-8.49858, 117.43213" />
+
 		<!-- Open Graph / Facebook -->
-		<meta property="og:type" content="website" />
+		<meta property="og:type" content={type} />
 		<meta property="og:url" content={Astro.url.href} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content={new URL('/logo.png', Astro.url)} />
+		<meta property="og:image" content={new URL(image, Astro.url)} />
 		
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
 		<meta property="twitter:url" content={Astro.url.href} />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content={new URL('/logo.png', Astro.url)} />
+		<meta property="twitter:image" content={new URL(image, Astro.url)} />
 		
 		<!-- SEO Basics -->
 		<meta name="robots" content="index, follow" />
@@ -58,16 +70,28 @@ const {
 		</noscript>
 		
 		<!-- Schema.org JSON-LD -->
-		<script type="application/ld+json" set:html={`
-		{
-		  "@context": "https://schema.org",
-		  "@type": "Organization",
-		  "name": "Pinabae Studio",
-		  "url": "https://pinabae-studio.vercel.app/",
-		  "logo": "https://pinabae-studio.vercel.app/logo.png",
-		  "description": "Jasa pembuatan website profesional untuk membantu UMKM, startup, dan personal brand tumbuh di era digital."
-		}
-		`} />
+		{schema ? (
+			<script type="application/ld+json" set:html={schema} />
+		) : (
+			<script type="application/ld+json" set:html={`
+			{
+			  "@context": "https://schema.org",
+			  "@type": "LocalBusiness",
+			  "name": "Pinabae Studio",
+			  "image": "https://pinabae-studio.vercel.app/logo.png",
+			  "url": "https://pinabae-studio.vercel.app/",
+			  "telephone": "+6282339265052",
+			  "address": {
+			    "@type": "PostalAddress",
+			    "addressLocality": "Sumbawa Besar",
+			    "addressRegion": "Nusa Tenggara Barat",
+			    "addressCountry": "ID"
+			  },
+			  "description": "Jasa pembuatan website profesional dan web developer di Sumbawa untuk membantu UMKM tumbuh di era digital.",
+			  "priceRange": "$$"
+			}
+			`} />
+		)}
 		<script type="application/ld+json" set:html={`
 		{
 		  "@context": "https://schema.org",

@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import Section from '../../components/ui/Section.astro';
 import Button from '../../components/ui/Button.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { supabase } from '../../lib/supabase';
 
 const { data: services } = await supabase
@@ -12,7 +13,7 @@ const { data: services } = await supabase
   .order('created_at', { ascending: true });
 ---
 
-<Layout title="Layanan Kami | Pinabae Studio" description="Solusi digital untuk membangun kredibilitas, meningkatkan visibilitas, dan mendukung pertumbuhan bisnis Anda.">
+<Layout title="Layanan Jasa Pembuatan Website & Digital Agency Sumbawa | Pinabae Studio" description="Berbagai layanan digital dari Pinabae Studio untuk UMKM di Sumbawa: Jasa pembuatan website, landing page, SEO, dan digital marketing.">
   <Navbar />
 
   <main class="flex-grow pt-32">
@@ -20,8 +21,11 @@ const { data: services } = await supabase
     <!-- Hero / Section 1: Masalah -->
     <Section class="pb-16 md:pb-24">
       <div class="max-w-3xl mx-auto text-center mb-16 header-anim opacity-0 translate-y-8">
+        <div class="flex justify-center mb-4">
+          <Breadcrumb items={[{ label: "Layanan Kami" }]} />
+        </div>
         <h1 class="text-4xl md:text-5xl font-extrabold text-dark tracking-tight leading-tight mb-6">
-          Apakah Bisnis Anda Mengalami Salah Satu Tantangan Ini?
+          Layanan Digital Agency Sumbawa untuk Mengatasi Tantangan Bisnis Anda
         </h1>
         <p class="text-lg md:text-xl text-text leading-relaxed">
           Banyak bisnis memiliki produk atau layanan yang berkualitas, tetapi belum memiliki kehadiran digital yang mampu membangun kepercayaan, menjangkau pelanggan baru, dan mendukung pertumbuhan bisnis.

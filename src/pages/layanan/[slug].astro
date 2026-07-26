@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import Section from '../../components/ui/Section.astro';
 import Button from '../../components/ui/Button.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { supabase } from '../../lib/supabase';
 
 export async function getStaticPaths() {
@@ -27,18 +28,15 @@ if (error || !service) {
 }
 ---
 
-<Layout title={`${service.title} | Pinabae Studio`} description={service.description}>
+<Layout title={`${service.title} | Layanan Digital Agency Sumbawa - Pinabae Studio`} description={service.description.substring(0, 160).replace(/<[^>]*>?/gm, '')}>
   <Navbar />
   
   <main class="flex-grow pt-32">
     <Section>
       <div class="max-w-4xl mx-auto">
-        <a href="/layanan" class="text-gray-500 hover:text-primary mb-8 inline-flex items-center gap-2 text-sm font-medium transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-          Kembali ke Layanan
-        </a>
+        <Breadcrumb items={[{ label: "Layanan Kami", href: "/layanan" }, { label: service.title }]} />
         
-        <div class="header-anim opacity-0 translate-y-8">
+        <div class="header-anim opacity-0 translate-y-8 mt-6">
           <h1 class="text-4xl md:text-5xl font-bold text-dark mb-6">{service.title}</h1>
         </div>
 

@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import Section from '../../components/ui/Section.astro';
 import Card from '../../components/ui/Card.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { supabase } from '../../lib/supabase';
 
 // Fetch published blog posts
@@ -15,14 +16,17 @@ const { data: posts } = await supabase
   .order('published_at', { ascending: false });
 ---
 
-<Layout title="Blog | Pinabae Studio" description="Artikel, wawasan, dan tips terbaru seputar website, desain, dan bisnis digital.">
+<Layout title="Blog & Insight Digital | Digital Agency Sumbawa - Pinabae Studio" description="Artikel, wawasan, dan tips terbaru seputar pembuatan website, SEO, desain, dan bisnis digital dari Pinabae Studio.">
   <Navbar />
   
   <main class="flex-grow pt-24">
     <Section class="pb-10 md:pb-16 text-center">
       <div class="max-w-3xl mx-auto header-anim opacity-0 translate-y-8">
+        <div class="flex justify-center mb-4">
+          <Breadcrumb items={[{ label: "Blog" }]} />
+        </div>
         <h1 class="text-4xl md:text-6xl font-extrabold text-dark tracking-tight mb-6">Wawasan & <span class="text-primary">Edukasi</span></h1>
-        <p class="text-xl text-text">Artikel terbaru tentang desain website, strategi digital, dan pengembangan bisnis.</p>
+        <p class="text-xl text-text">Artikel terbaru tentang SEO, website bisnis UMKM, strategi digital, dan teknologi.</p>
       </div>
     </Section>
 

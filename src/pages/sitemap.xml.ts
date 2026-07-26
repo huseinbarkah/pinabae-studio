@@ -16,6 +16,7 @@ export const GET: APIRoute = async ({ request }) => {
     // Halaman statis utama
     const staticPages = [
       '',
+      '/jasa-pembuatan-website-sumbawa',
       '/tentang',
       '/layanan',
       '/portfolio',

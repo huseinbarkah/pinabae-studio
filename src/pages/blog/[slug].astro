@@ -5,6 +5,7 @@ import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import Section from '../../components/ui/Section.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { supabase } from '../../lib/supabase';
 
 export async function getStaticPaths() {
@@ -52,9 +53,22 @@ const seoTitle = post.meta_title || `${post.title} | Blog Pinabae Studio`;
 const seoDescription = post.meta_description || post.excerpt;
 const author = post.blog_authors;
 const tags = post.post_tags ? post.post_tags.map((pt: any) => pt.blog_tags) : [];
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": post.title,
+  "image": post.featured_image ? [post.featured_image] : ["https://pinabae-studio.vercel.app/logo.png"],
+  "datePublished": post.published_at,
+  "author": [{
+    "@type": "Person",
+    "name": author ? author.name : "Pinabae Studio",
+    "url": author?.website_url || "https://pinabae-studio.vercel.app/"
+  }]
+};
 ---
 
-<Layout title={seoTitle} description={seoDescription}>
+<Layout title={seoTitle} description={seoDescription} schema={JSON.stringify(articleSchema)} type="article" image={post.featured_image}>
   <!-- Sticky Navbar (Specific for Blog Post) -->
   <header class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 transition-transform duration-300 transform" id="blog-navbar">
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -90,7 +104,9 @@ const tags = post.post_tags ? post.post_tags.map((pt: any) => pt.blog_tags) : []
       <Section class="pb-10 pt-10">
         <div class="max-w-4xl mx-auto">
           
-          <div class="flex items-center gap-3 text-sm font-semibold mb-6 header-anim opacity-0 translate-y-4">
+          <Breadcrumb items={[{ label: "Blog", href: "/blog" }, { label: post.title }]} />
+          
+          <div class="flex items-center gap-3 text-sm font-semibold mb-6 header-anim opacity-0 translate-y-4 mt-6">
             {post.categories && (
               <a href={`/blog/category/${post.categories.slug}`} class="px-3 py-1 rounded-full bg-gray-100 text-dark hover:bg-gray-200 transition-colors">
                 {post.categories.name}
@@ -131,7 +147,7 @@ const tags = post.post_tags ? post.post_tags.map((pt: any) => pt.blog_tags) : []
         
         {post.featured_image && (
           <div class="max-w-5xl mx-auto aspect-video rounded-2xl md:rounded-3xl overflow-hidden shadow-xl mb-16 header-anim opacity-0 translate-y-8 relative group">
-            <img src={post.featured_image} alt={post.alt_featured_image || post.title} class="w-full h-full object-cover" />
+            <img src={post.featured_image} alt={post.alt_featured_image || post.title} class="w-full h-full object-cover" loading="eager" fetchpriority="high" />
           </div>
         )}
 

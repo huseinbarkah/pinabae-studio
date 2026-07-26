@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import Section from '../components/ui/Section.astro';
 import Button from '../components/ui/Button.astro';
 import Card from '../components/ui/Card.astro';
+import Breadcrumb from '../components/ui/Breadcrumb.astro';
 import { supabase } from '../lib/supabase';
 
 let teamMembers = [];
@@ -20,7 +21,7 @@ try {
 }
 ---
 
-<Layout title="Tentang Kami | Pinabae Studio" description="Pinabae Studio adalah digital agency asal Sumbawa yang membantu bisnis membangun kehadiran digital profesional.">
+<Layout title="Tentang Kami | Digital Agency Sumbawa - Pinabae Studio" description="Pinabae Studio adalah Digital Agency dan Web Developer di Sumbawa yang membantu bisnis lokal dan UMKM membangun kehadiran digital profesional.">
   <Navbar />
   
   <main class="flex-grow pt-32">
@@ -30,12 +31,15 @@ try {
       
       <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
         <div class="lg:w-1/2 hero-anim opacity-0 translate-y-8">
-          <div class="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full text-sm text-primary font-bold mb-6">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-100 rounded-full text-sm text-primary font-bold mb-6 mt-4">
             <i data-lucide="map-pin" class="w-4 h-4"></i>
             Digital Agency • Sumbawa, NTB
           </div>
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-dark tracking-tight mb-6 leading-[1.15]">
-            Membangun Solusi Digital untuk Membantu Bisnis Bertumbuh
+          
+          <Breadcrumb items={[{ label: "Tentang Kami" }]} />
+
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-dark tracking-tight mb-6 leading-[1.15] mt-4">
+            Digital Agency Sumbawa yang Membantu Bisnis Bertumbuh
           </h1>
           <p class="text-lg md:text-xl text-text leading-relaxed mb-10 text-balance">
             Pinabae Studio adalah digital agency asal Sumbawa yang membantu UMKM, perusahaan, startup, dan personal brand membangun kehadiran digital yang profesional. Kami percaya bahwa platform bisnis bukan sekadar identitas online, tetapi aset digital yang mampu meningkatkan kepercayaan, memperluas jangkauan pelanggan, dan mendorong pertumbuhan bisnis.

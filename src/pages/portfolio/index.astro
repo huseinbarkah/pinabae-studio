@@ -5,20 +5,24 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import Section from '../../components/ui/Section.astro';
 import Card from '../../components/ui/Card.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { supabase } from '../../lib/supabase';
 
 const { data: portfolios } = await supabase.from('portfolio').select('slug, image_url, title, client_name, description').order('created_at', { ascending: false });
 ---
 
-<Layout title="Portfolio | Pinabae Studio" description="Kumpulan hasil karya website terbaik dari Pinabae Studio.">
+<Layout title="Portfolio & Hasil Karya | Jasa Pembuatan Website Sumbawa - Pinabae Studio" description="Kumpulan hasil karya website terbaik dari Pinabae Studio. Lihat bagaimana kami membantu berbagai klien dan bisnis di Sumbawa.">
   <Navbar />
 
   <main class="flex-grow pt-24">
     <!-- Header -->
     <Section class="pb-10 md:pb-16 text-center">
       <div class="max-w-3xl mx-auto header-anim opacity-0 translate-y-8">
+        <div class="flex justify-center mb-4">
+          <Breadcrumb items={[{ label: "Portfolio" }]} />
+        </div>
         <h1 class="text-4xl md:text-6xl font-extrabold text-dark tracking-tight mb-6">Hasil <span class="text-primary">Karya Kami</span></h1>
-        <p class="text-xl text-text">Jelajahi berbagai proyek website sukses yang telah kami bangun untuk berbagai jenis bisnis.</p>
+        <p class="text-xl text-text">Jelajahi berbagai proyek website sukses yang telah kami bangun untuk berbagai jenis bisnis di Sumbawa dan sekitarnya.</p>
       </div>
     </Section>
 
