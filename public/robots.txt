@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://pinabae.site/sitemap-index.xml
+Sitemap: https://pinabae.site/sitemap.xml

@@ -46,8 +46,8 @@ export const GET: APIRoute = async ({ request }) => {
         sitemap += `
   <url>
     <loc>${siteUrl}/blog/${blog.slug}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>`;
       });
     }
