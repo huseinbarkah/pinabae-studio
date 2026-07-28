@@ -1,0 +1,463 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Transaksi | Modul Keuangan">
+  <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-dark">Manajemen Transaksi</h1>
+      <p class="text-text">Catat arus kas pemasukan dan pengeluaran.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="document.dispatchEvent(new CustomEvent('export-csv'))" class="px-4 py-2 bg-white text-dark border border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        Export CSV
+      </button>
+      <button onclick="document.dispatchEvent(new CustomEvent('open-transaction-modal', {detail: {type: 'Pemasukan'}}))" class="px-4 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center gap-2 shadow-sm shadow-green-500/20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        Pemasukan
+      </button>
+      <button onclick="document.dispatchEvent(new CustomEvent('open-transaction-modal', {detail: {type: 'Pengeluaran'}}))" class="px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-colors flex items-center gap-2 shadow-sm shadow-red-500/20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+        Pengeluaran
+      </button>
+    </div>
+  </div>
+
+  <div x-data="transactionsData()" class="space-y-6">
+    <!-- Summary Widget -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-sm font-bold text-gray-500 mb-1">Total Pemasukan (Filter)</p>
+          <h3 class="text-2xl font-black text-green-500" x-text="formatCurrency(totalIn)"></h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-green-50 text-green-500 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-sm font-bold text-gray-500 mb-1">Total Pengeluaran (Filter)</p>
+          <h3 class="text-2xl font-black text-red-500" x-text="formatCurrency(totalOut)"></h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v-4a4 4 0 0 0-8 0v4"/><path d="M12 12v4"/><rect width="18" height="12" x="3" y="10" rx="2"/></svg>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-sm font-bold text-gray-500 mb-1">Selisih (Laba Bersih)</p>
+          <h3 class="text-2xl font-black text-dark" x-text="formatCurrency(totalIn - totalOut)"></h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="bg-white p-4 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center z-10 sticky top-0">
+      <div class="relative w-full md:w-80">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" x-model="searchQuery" @input="filterItems" placeholder="Cari catatan..." class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none">
+      </div>
+      <div class="flex flex-wrap md:flex-nowrap gap-2 w-full md:w-auto">
+        <input type="month" x-model="monthFilter" @change="filterItems" class="px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none w-full md:w-auto">
+        <select x-model="typeFilter" @change="filterItems" class="px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none w-full md:w-auto">
+          <option value="all">Semua Jenis</option>
+          <option value="Pemasukan">Pemasukan</option>
+          <option value="Pengeluaran">Pengeluaran</option>
+        </select>
+        <button @click="loadItems()" class="p-2 text-gray-500 border border-gray-300 rounded-lg hover:text-primary hover:border-primary transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{'animate-spin': loading}"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+      <!-- Loading State -->
+      <div x-show="loading" class="p-12 text-center text-gray-400">
+        <svg class="animate-spin h-8 w-8 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <p>Memuat data transaksi...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div x-show="!loading && filteredItems.length === 0" class="p-12 text-center text-gray-500" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-300"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        <p class="text-lg font-medium text-dark mb-1">Belum ada transaksi</p>
+        <p class="text-sm">Silakan catat pemasukan atau pengeluaran baru.</p>
+      </div>
+
+      <div class="overflow-x-auto" x-show="!loading && filteredItems.length > 0" style="display: none;">
+        <table class="w-full text-left whitespace-nowrap">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori / Klien</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nominal & Pembayaran</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <template x-for="item in filteredItems" :key="item.id">
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="font-bold text-dark" x-text="formatDate(item.date)"></div>
+                  <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                    <span :class="item.type === 'Pemasukan' ? 'text-green-500' : 'text-red-500'">
+                      <svg x-show="item.type === 'Pemasukan'" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                      <svg x-show="item.type === 'Pengeluaran'" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                    </span>
+                    <span x-text="item.type"></span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-bold text-dark" x-text="getCategoryName(item.category_id)"></div>
+                  <div class="text-sm text-gray-500 mt-1" x-show="item.client_id">
+                    Klien: <span x-text="getClientName(item.client_id)"></span>
+                  </div>
+                  <div class="text-xs text-gray-400 mt-1 max-w-[200px] truncate" x-text="item.notes" :title="item.notes"></div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="font-bold text-lg" :class="item.type === 'Pemasukan' ? 'text-green-500' : 'text-red-500'" x-text="formatCurrency(item.amount)"></div>
+                  <div class="text-xs text-gray-500 mt-1 font-medium bg-gray-100 inline-block px-2 py-0.5 rounded" x-text="item.payment_method || '-'"></div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold" 
+                        :class="{
+                          'bg-green-100 text-green-700': item.status === 'Berhasil',
+                          'bg-yellow-100 text-yellow-700': item.status === 'Pending',
+                          'bg-red-100 text-red-700': item.status === 'Dibatalkan'
+                        }" x-text="item.status"></span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button @click="openEditModal(item)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                    <button @click="deleteItem(item.id)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transaction Form Modal -->
+    <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeModal()"></div>
+      <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl z-10 mx-4 max-h-[90vh] flex flex-col" x-transition.scale.origin.bottom>
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center rounded-t-2xl" :class="form.type === 'Pemasukan' ? 'bg-green-50' : 'bg-red-50'">
+          <h3 class="text-xl font-bold text-dark" x-text="(isEdit ? 'Edit ' : 'Tambah ') + form.type"></h3>
+          <button @click="closeModal()" class="text-gray-400 hover:text-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto flex-grow">
+          <form @submit.prevent="saveItem" id="transactionForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="md:col-span-2">
+              <label class="block text-sm font-bold text-dark mb-1">Tanggal <span class="text-red-500">*</span></label>
+              <input type="date" x-model="form.date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none">
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-bold text-dark mb-1">Nominal (Rp) <span class="text-red-500">*</span></label>
+              <input type="number" x-model="form.amount" required class="w-full px-4 py-3 text-lg font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="0">
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-dark mb-1">Kategori</label>
+              <select x-model="form.category_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none bg-white">
+                <option value="">Pilih Kategori</option>
+                <template x-for="cat in categories.filter(c => c.type === form.type)" :key="cat.id">
+                  <option :value="cat.id" x-text="cat.name"></option>
+                </template>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-dark mb-1">Klien (Opsional)</label>
+              <select x-model="form.client_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none bg-white">
+                <option value="">Tidak ada klien</option>
+                <template x-for="client in clients" :key="client.id">
+                  <option :value="client.id" x-text="client.name"></option>
+                </template>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-dark mb-1">Metode Pembayaran</label>
+              <select x-model="form.payment_method" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none bg-white">
+                <option value="Transfer">Transfer Bank</option>
+                <option value="Cash">Cash</option>
+                <option value="QRIS">QRIS</option>
+                <option value="E-Wallet">E-Wallet</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-dark mb-1">Status</label>
+              <select x-model="form.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none bg-white">
+                <option value="Berhasil">Berhasil</option>
+                <option value="Pending">Pending</option>
+                <option value="Dibatalkan">Dibatalkan</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-bold text-dark mb-1">Catatan</label>
+              <textarea x-model="form.notes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Tujuan, rincian, dsb..."></textarea>
+            </div>
+          </form>
+        </div>
+        
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+          <button type="button" @click="closeModal()" class="px-5 py-2.5 bg-gray-200 text-dark font-bold rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+          <button type="submit" form="transactionForm" class="px-5 py-2.5 text-white font-bold rounded-lg transition-colors flex items-center gap-2" :class="form.type === 'Pemasukan' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'" :disabled="submitting">
+            <span x-show="!submitting">Simpan Transaksi</span>
+            <span x-show="submitting" style="display: none;">Menyimpan...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase } from '../../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    
+    document.addEventListener('open-transaction-modal', (e) => {
+      window.dispatchEvent(new CustomEvent('alpine-open-tx-modal', { detail: e.detail }));
+    });
+
+    document.addEventListener('export-csv', () => {
+      window.dispatchEvent(new CustomEvent('alpine-export-csv'));
+    });
+
+    window.Alpine.data('transactionsData', () => ({
+      items: [],
+      filteredItems: [],
+      categories: [],
+      clients: [],
+      
+      searchQuery: '',
+      typeFilter: 'all',
+      monthFilter: new Date().toISOString().slice(0,7), // YYYY-MM
+      
+      totalIn: 0,
+      totalOut: 0,
+      
+      loading: true,
+      modalOpen: false,
+      isEdit: false,
+      submitting: false,
+      
+      form: {
+        id: null, date: '', type: 'Pemasukan', category_id: '', client_id: '',
+        amount: 0, payment_method: 'Transfer', status: 'Berhasil', notes: ''
+      },
+
+      async init() {
+        await Promise.all([
+          this.fetchDependencies(),
+          this.loadItems()
+        ]);
+        window.addEventListener('alpine-open-tx-modal', (e) => this.openCreateModal(e.detail.type));
+        window.addEventListener('alpine-export-csv', () => this.exportCSV());
+      },
+
+      async fetchDependencies() {
+        const [catRes, cliRes] = await Promise.all([
+          supabase.from('transaction_categories').select('*'),
+          supabase.from('clients').select('id, name').eq('is_deleted', false)
+        ]);
+        this.categories = catRes.data || [];
+        this.clients = cliRes.data || [];
+      },
+
+      async loadItems() {
+        this.loading = true;
+        try {
+          const { data, error } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('is_deleted', false)
+            .order('date', { ascending: false });
+            
+          if (error) throw error;
+          this.items = data || [];
+          this.filterItems();
+        } catch (error) {
+          console.error('Error:', error);
+          if (error.code === '42P01') {
+            alert('Tabel transactions belum ada. Harap jalankan migrasi SQL.');
+          }
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      filterItems() {
+        let result = this.items;
+        
+        if (this.typeFilter !== 'all') {
+          result = result.filter(item => item.type === this.typeFilter);
+        }
+        
+        if (this.monthFilter) {
+          result = result.filter(item => item.date && item.date.startsWith(this.monthFilter));
+        }
+        
+        if (this.searchQuery) {
+          const q = this.searchQuery.toLowerCase();
+          result = result.filter(item => 
+            (item.notes && item.notes.toLowerCase().includes(q))
+          );
+        }
+        
+        this.filteredItems = result;
+        this.calculateTotals();
+      },
+
+      calculateTotals() {
+        this.totalIn = this.filteredItems.filter(i => i.type === 'Pemasukan' && i.status === 'Berhasil').reduce((sum, item) => sum + Number(item.amount), 0);
+        this.totalOut = this.filteredItems.filter(i => i.type === 'Pengeluaran' && i.status === 'Berhasil').reduce((sum, item) => sum + Number(item.amount), 0);
+      },
+
+      getCategoryName(id) {
+        if (!id) return '-';
+        const cat = this.categories.find(c => c.id === id);
+        return cat ? cat.name : 'Unknown';
+      },
+      
+      getClientName(id) {
+        if (!id) return '-';
+        const client = this.clients.find(c => c.id === id);
+        return client ? client.name : 'Unknown';
+      },
+
+      formatCurrency(val) {
+        if (val === undefined || val === null) return 'Rp 0';
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+      },
+      
+      formatDate(dateStr) {
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+      },
+
+      openCreateModal(type = 'Pemasukan') {
+        this.isEdit = false;
+        this.form = {
+          id: null, 
+          date: new Date().toISOString().split('T')[0], 
+          type: type, 
+          category_id: '', 
+          client_id: '',
+          amount: '', 
+          payment_method: 'Transfer', 
+          status: 'Berhasil', 
+          notes: ''
+        };
+        this.modalOpen = true;
+      },
+
+      openEditModal(item) {
+        this.isEdit = true;
+        this.form = { ...item };
+        if (this.form.date) this.form.date = this.form.date.split('T')[0];
+        if (!this.form.client_id) this.form.client_id = '';
+        if (!this.form.category_id) this.form.category_id = '';
+        this.modalOpen = true;
+      },
+
+      closeModal() {
+        this.modalOpen = false;
+      },
+
+      async saveItem() {
+        this.submitting = true;
+        try {
+          const payload = { ...this.form };
+          const id = payload.id;
+          delete payload.id; 
+          
+          if (payload.client_id === '') payload.client_id = null;
+          if (payload.category_id === '') payload.category_id = null;
+
+          if (this.isEdit) {
+            const { error } = await supabase.from('transactions').update(payload).eq('id', id);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase.from('transactions').insert([payload]);
+            if (error) throw error;
+          }
+          
+          this.closeModal();
+          await this.loadItems();
+        } catch (error) {
+          console.error("Save error:", error);
+          alert('Gagal menyimpan transaksi.');
+        } finally {
+          this.submitting = false;
+        }
+      },
+
+      async deleteItem(id) {
+        if (!confirm('Hapus transaksi ini? (Soft Delete)')) return;
+        
+        try {
+          const { error } = await supabase.from('transactions').update({ is_deleted: true }).eq('id', id);
+          if (error) throw error;
+          await this.loadItems();
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('Gagal menghapus data.');
+        }
+      },
+      
+      exportCSV() {
+        if (this.filteredItems.length === 0) {
+          alert("Tidak ada data untuk diexport.");
+          return;
+        }
+        
+        const headers = ["Tanggal", "Jenis", "Kategori", "Klien", "Nominal", "Metode", "Status", "Catatan"];
+        const rows = this.filteredItems.map(item => [
+          item.date,
+          item.type,
+          this.getCategoryName(item.category_id),
+          this.getClientName(item.client_id),
+          item.amount,
+          item.payment_method,
+          item.status,
+          (item.notes || '').replace(/,/g, '') // prevent CSV break
+        ]);
+        
+        let csvContent = "data:text/csv;charset=utf-8," 
+          + headers.join(",") + "\n"
+          + rows.map(e => e.join(",")).join("\n");
+          
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Laporan_Transaksi_${this.monthFilter || 'All'}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }));
+  });
+</script>

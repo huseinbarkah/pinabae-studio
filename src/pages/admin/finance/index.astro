@@ -1,0 +1,423 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Dashboard Keuangan | Admin Pinabae">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-dark">Dashboard Keuangan</h1>
+    <p class="text-text">Ringkasan performa finansial dan arus kas bisnis Anda.</p>
+  </div>
+
+  <div x-data="financeDashboard()" class="space-y-6">
+    <!-- Loading State -->
+    <div x-show="loading" class="bg-white p-12 rounded-xl border border-gray-100 shadow-sm text-center text-gray-400">
+      <svg class="animate-spin h-8 w-8 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+      <p>Mengumpulkan data finansial...</p>
+    </div>
+
+    <div x-show="!loading" style="display: none;" class="space-y-6">
+      
+      <!-- Top Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Pendapatan Bulan Ini -->
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-sm font-bold text-gray-500">Pendapatan Bulan Ini</p>
+              <h3 class="text-2xl font-black text-green-500 mt-1" x-text="formatCurrency(stats.incomeThisMonth)"></h3>
+            </div>
+            <div class="p-2 bg-green-50 text-green-500 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 flex items-center gap-1">
+            <span :class="stats.incomeGrowth >= 0 ? 'text-green-500' : 'text-red-500'" class="font-bold flex items-center">
+              <svg x-show="stats.incomeGrowth >= 0" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 11-5-5-5 5"/><path d="M12 18V6"/></svg>
+              <svg x-show="stats.incomeGrowth < 0" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 13-5 5-5-5"/><path d="M12 6v12"/></svg>
+              <span x-text="Math.abs(stats.incomeGrowth).toFixed(1) + '%'"></span>
+            </span>
+            vs bulan lalu
+          </div>
+        </div>
+        
+        <!-- Pengeluaran Bulan Ini -->
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-sm font-bold text-gray-500">Pengeluaran Bulan Ini</p>
+              <h3 class="text-2xl font-black text-red-500 mt-1" x-text="formatCurrency(stats.expenseThisMonth)"></h3>
+            </div>
+            <div class="p-2 bg-red-50 text-red-500 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 12-7 7-7-7"/><path d="M12 5v14"/></svg>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 flex items-center gap-1">
+            <span :class="stats.expenseGrowth <= 0 ? 'text-green-500' : 'text-red-500'" class="font-bold flex items-center">
+              <span x-text="(stats.expenseGrowth > 0 ? '+' : '') + stats.expenseGrowth.toFixed(1) + '%'"></span>
+            </span>
+            vs bulan lalu
+          </div>
+        </div>
+
+        <!-- Laba Bersih -->
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-sm font-bold text-gray-500">Laba Bersih (Bulan Ini)</p>
+              <h3 class="text-2xl font-black text-primary mt-1" x-text="formatCurrency(stats.incomeThisMonth - stats.expenseThisMonth)"></h3>
+            </div>
+            <div class="p-2 bg-orange-50 text-primary rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">Margin: <span class="font-bold text-dark" x-text="stats.incomeThisMonth ? Math.round(((stats.incomeThisMonth - stats.expenseThisMonth) / stats.incomeThisMonth) * 100) + '%' : '0%'"></span></div>
+        </div>
+
+        <!-- Invoice Belum Dibayar -->
+        <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-sm font-bold text-gray-500">Piutang Invoice</p>
+              <h3 class="text-2xl font-black text-blue-500 mt-1" x-text="formatCurrency(stats.unpaidInvoices)"></h3>
+            </div>
+            <div class="p-2 bg-blue-50 text-blue-500 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 18a3 3 0 1 0-6 0"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><circle cx="12" cy="13" r="2"/></svg>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 mt-1"><span class="font-bold text-dark" x-text="stats.unpaidCount"></span> Invoice aktif</div>
+        </div>
+      </div>
+
+      <!-- Target Progress Bar -->
+      <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+        <div class="flex justify-between items-end mb-2">
+          <div>
+            <h3 class="font-bold text-dark">Target Pendapatan Bulanan</h3>
+            <p class="text-sm text-gray-500">Bulan <span x-text="new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})"></span></p>
+          </div>
+          <div class="text-right">
+            <span class="text-2xl font-black text-primary" x-text="targetProgress + '%'"></span>
+            <p class="text-xs font-bold text-gray-400 uppercase">Tercapai</p>
+          </div>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-4 mb-2 overflow-hidden border border-gray-200">
+          <div class="bg-primary h-4 rounded-full transition-all duration-1000 ease-out" :style="'width: ' + Math.min(targetProgress, 100) + '%'"></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-500 font-medium">
+          <span x-text="formatCurrency(stats.incomeThisMonth)"></span>
+          <span x-text="'Target: ' + formatCurrency(settings.monthly_target)"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Chart Section -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <h3 class="font-bold text-dark mb-6">Arus Kas 6 Bulan Terakhir</h3>
+          <div class="relative h-72 w-full">
+            <canvas id="cashflowChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Sidebar Widgets -->
+        <div class="space-y-6">
+          
+          <!-- Recent Transactions -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 class="font-bold text-dark">Transaksi Terbaru</h3>
+              <a href="/admin/finance/transactions" class="text-xs text-primary font-bold hover:underline">Lihat Semua</a>
+            </div>
+            <div class="divide-y divide-gray-100">
+              <template x-for="tx in recentTransactions" :key="tx.id">
+                <div class="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" :class="tx.type === 'Pemasukan' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
+                      <svg x-show="tx.type === 'Pemasukan'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                      <svg x-show="tx.type === 'Pengeluaran'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-dark truncate max-w-[150px]" x-text="getCategoryName(tx.category_id) || tx.notes || 'Transaksi'"></p>
+                      <p class="text-xs text-gray-500" x-text="formatDate(tx.date)"></p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm font-bold" :class="tx.type === 'Pemasukan' ? 'text-green-600' : 'text-dark'" x-text="(tx.type === 'Pemasukan' ? '+' : '-') + formatCurrency(tx.amount)"></p>
+                    <p class="text-[10px] uppercase font-bold text-gray-400 mt-0.5" x-text="tx.status"></p>
+                  </div>
+                </div>
+              </template>
+              <div x-show="recentTransactions.length === 0" class="p-4 text-center text-sm text-gray-500">Belum ada transaksi.</div>
+            </div>
+          </div>
+
+          <!-- Top Clients -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 class="font-bold text-dark">Top Klien Aktif</h3>
+              <a href="/admin/finance/clients" class="text-xs text-primary font-bold hover:underline">Kelola</a>
+            </div>
+            <div class="divide-y divide-gray-100">
+              <template x-for="client in topClients" :key="client.id">
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                  <div class="flex justify-between items-start mb-1">
+                    <p class="text-sm font-bold text-dark" x-text="client.name"></p>
+                    <p class="text-sm font-bold text-primary" x-text="formatCurrency(client.project_value)"></p>
+                  </div>
+                  <div class="flex justify-between items-center text-xs text-gray-500">
+                    <span x-text="client.service || 'Project Umum'"></span>
+                    <span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[10px] font-bold" x-text="client.status"></span>
+                  </div>
+                </div>
+              </template>
+              <div x-show="topClients.length === 0" class="p-4 text-center text-sm text-gray-500">Belum ada klien aktif.</div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase } from '../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    window.Alpine.data('financeDashboard', () => ({
+      loading: true,
+      settings: { monthly_target: 10000000 },
+      categories: [],
+      
+      stats: {
+        incomeThisMonth: 0,
+        expenseThisMonth: 0,
+        incomeLastMonth: 0,
+        expenseLastMonth: 0,
+        incomeGrowth: 0,
+        expenseGrowth: 0,
+        unpaidInvoices: 0,
+        unpaidCount: 0
+      },
+      
+      targetProgress: 0,
+      recentTransactions: [],
+      topClients: [],
+      
+      async init() {
+        await this.loadData();
+      },
+
+      async loadData() {
+        this.loading = true;
+        try {
+          // Get current and last month boundaries
+          const now = new Date();
+          const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+          const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().split('T')[0];
+          const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+          
+          // Fetch settings
+          const { data: set } = await supabase.from('financial_settings').select('monthly_target').limit(1).single();
+          if (set) this.settings.monthly_target = set.monthly_target || 10000000;
+          
+          // Fetch categories
+          const { data: cats } = await supabase.from('transaction_categories').select('*');
+          this.categories = cats || [];
+          
+          // 1. Transactions (Current Month)
+          const { data: txCurrent } = await supabase.from('transactions')
+            .select('amount, type')
+            .eq('is_deleted', false)
+            .eq('status', 'Berhasil')
+            .gte('date', currentMonthStart)
+            .lt('date', nextMonthStart);
+            
+          this.stats.incomeThisMonth = (txCurrent || []).filter(t => t.type === 'Pemasukan').reduce((acc, t) => acc + Number(t.amount), 0);
+          this.stats.expenseThisMonth = (txCurrent || []).filter(t => t.type === 'Pengeluaran').reduce((acc, t) => acc + Number(t.amount), 0);
+          
+          // 2. Transactions (Last Month)
+          const { data: txLast } = await supabase.from('transactions')
+            .select('amount, type')
+            .eq('is_deleted', false)
+            .eq('status', 'Berhasil')
+            .gte('date', lastMonthStart)
+            .lt('date', currentMonthStart);
+            
+          this.stats.incomeLastMonth = (txLast || []).filter(t => t.type === 'Pemasukan').reduce((acc, t) => acc + Number(t.amount), 0);
+          this.stats.expenseLastMonth = (txLast || []).filter(t => t.type === 'Pengeluaran').reduce((acc, t) => acc + Number(t.amount), 0);
+          
+          // Growth calculation
+          if (this.stats.incomeLastMonth > 0) {
+            this.stats.incomeGrowth = ((this.stats.incomeThisMonth - this.stats.incomeLastMonth) / this.stats.incomeLastMonth) * 100;
+          } else {
+            this.stats.incomeGrowth = this.stats.incomeThisMonth > 0 ? 100 : 0;
+          }
+          
+          if (this.stats.expenseLastMonth > 0) {
+            this.stats.expenseGrowth = ((this.stats.expenseThisMonth - this.stats.expenseLastMonth) / this.stats.expenseLastMonth) * 100;
+          } else {
+            this.stats.expenseGrowth = this.stats.expenseThisMonth > 0 ? 100 : 0;
+          }
+
+          // Target Progress
+          this.targetProgress = Math.round((this.stats.incomeThisMonth / this.settings.monthly_target) * 100);
+
+          // 3. Unpaid Invoices
+          const { data: inv } = await supabase.from('invoices')
+            .select('grand_total')
+            .eq('is_deleted', false)
+            .in('status', ['Menunggu Pembayaran', 'Sebagian Dibayar', 'Draft']);
+            
+          this.stats.unpaidCount = inv ? inv.length : 0;
+          this.stats.unpaidInvoices = (inv || []).reduce((acc, i) => acc + Number(i.grand_total), 0);
+
+          // 4. Recent Transactions
+          const { data: recentTx } = await supabase.from('transactions')
+            .select('id, date, type, amount, status, notes, category_id')
+            .eq('is_deleted', false)
+            .order('date', { ascending: false })
+            .limit(5);
+          this.recentTransactions = recentTx || [];
+          
+          // 5. Top Clients
+          const { data: clients } = await supabase.from('clients')
+            .select('id, name, service, project_value, status')
+            .eq('is_deleted', false)
+            .eq('status', 'Berjalan')
+            .order('project_value', { ascending: false })
+            .limit(5);
+          this.topClients = clients || [];
+          
+          // 6. Chart Data (Last 6 Months)
+          await this.renderChart();
+          
+        } catch (error) {
+          console.error("Dashboard error:", error);
+        } finally {
+          this.loading = false;
+        }
+      },
+      
+      async renderChart() {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+        const startDate = new Date(sixMonthsAgo.getFullYear(), sixMonthsAgo.getMonth(), 1).toISOString().split('T')[0];
+        
+        const { data: tx } = await supabase.from('transactions')
+            .select('date, type, amount')
+            .eq('is_deleted', false)
+            .eq('status', 'Berhasil')
+            .gte('date', startDate)
+            .order('date', { ascending: true });
+            
+        // Process data grouped by month
+        const monthlyData = {};
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+        
+        // Initialize last 6 months
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date();
+          d.setMonth(d.getMonth() - i);
+          const key = `${monthNames[d.getMonth()]} ${d.getFullYear().toString().slice(2)}`;
+          monthlyData[key] = { income: 0, expense: 0 };
+        }
+        
+        if (tx) {
+          tx.forEach(t => {
+            const d = new Date(t.date);
+            const key = `${monthNames[d.getMonth()]} ${d.getFullYear().toString().slice(2)}`;
+            if (monthlyData[key]) {
+              if (t.type === 'Pemasukan') monthlyData[key].income += Number(t.amount);
+              else if (t.type === 'Pengeluaran') monthlyData[key].expense += Number(t.amount);
+            }
+          });
+        }
+        
+        const labels = Object.keys(monthlyData);
+        const incomeData = labels.map(l => monthlyData[l].income);
+        const expenseData = labels.map(l => monthlyData[l].expense);
+        
+        setTimeout(() => {
+          const ctx = document.getElementById('cashflowChart');
+          if (ctx && window.Chart) {
+            new window.Chart(ctx, {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Pemasukan',
+                    data: incomeData,
+                    backgroundColor: '#10b981', // green-500
+                    borderRadius: 4,
+                  },
+                  {
+                    label: 'Pengeluaran',
+                    data: expenseData,
+                    backgroundColor: '#ef4444', // red-500
+                    borderRadius: 4,
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'top', align: 'end' },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) label += ': ';
+                        if (context.parsed.y !== null) {
+                          label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(context.parsed.y);
+                        }
+                        return label;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: '#f3f4f6' },
+                    border: { display: false },
+                    ticks: {
+                      callback: function(value) {
+                        if (value >= 1000000) return (value / 1000000) + ' Jt';
+                        if (value >= 1000) return (value / 1000) + ' Rb';
+                        return value;
+                      }
+                    }
+                  },
+                  x: {
+                    grid: { display: false },
+                    border: { display: false }
+                  }
+                }
+              }
+            });
+          }
+        }, 100);
+      },
+
+      getCategoryName(id) {
+        if (!id) return '';
+        const cat = this.categories.find(c => c.id === id);
+        return cat ? cat.name : '';
+      },
+
+      formatCurrency(val) {
+        if (val === undefined || val === null) return 'Rp 0';
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+      },
+      
+      formatDate(dateStr) {
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      }
+    }));
+  });
+</script>

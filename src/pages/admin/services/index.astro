@@ -58,7 +58,8 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
                 <div class="text-sm text-gray-500 truncate max-w-[300px]" x-text="item.description"></div>
               </td>
               <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800" x-text="item.badge_text || '-'"></span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800" x-text="(item.badges && item.badges.length > 0) ? item.badges[0] : (item.badge_text || '-')"></span>
+                <span x-show="item.is_active === false" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700">Nonaktif</span>
               </td>
               <td class="px-6 py-4">
                 <span class="text-sm text-gray-500 font-mono" x-text="'/' + item.slug"></span>
@@ -108,7 +109,12 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
             console.log('Services table might not exist yet.');
             this.items = [];
           } else {
-            this.items = data || [];
+            this.items = (data || []).sort((a, b) => {
+              const orderA = a.order_index ?? 0;
+              const orderB = b.order_index ?? 0;
+              if (orderA !== orderB) return orderA - orderB;
+              return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            });
           }
           this.filterItems();
         } catch (error) {

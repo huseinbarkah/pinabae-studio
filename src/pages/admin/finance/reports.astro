@@ -1,0 +1,439 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Laporan Keuangan | Admin Pinabae">
+  <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-dark">Laporan & Analitik Keuangan</h1>
+      <p class="text-text">Analisis performa bisnis, pendapatan, dan pengeluaran secara komprehensif.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="document.dispatchEvent(new CustomEvent('export-report-csv'))" class="px-4 py-2 bg-white text-dark border border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        Export CSV
+      </button>
+      <button onclick="document.dispatchEvent(new CustomEvent('export-report-pdf'))" class="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors flex items-center gap-2 shadow-sm shadow-orange-500/20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        Cetak Laporan (PDF)
+      </button>
+    </div>
+  </div>
+
+  <div x-data="reportsData()" class="space-y-6">
+    <!-- Filters -->
+    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-end z-10">
+      <div class="w-full md:w-auto flex flex-wrap gap-4 items-end">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Rentang Waktu</label>
+          <select x-model="timeFilter" @change="updateDateRange()" class="w-full md:w-48 px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none">
+            <option value="bulan_ini">Bulan Ini</option>
+            <option value="bulan_lalu">Bulan Lalu</option>
+            <option value="tahun_ini">Tahun Ini</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+        
+        <div x-show="timeFilter === 'custom'" class="flex items-center gap-2" style="display: none;">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Dari</label>
+            <input type="date" x-model="customStart" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Sampai</label>
+            <input type="date" x-model="customEnd" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none">
+          </div>
+        </div>
+      </div>
+      
+      <button @click="loadReport()" class="w-full md:w-auto px-6 py-2 bg-dark text-white font-bold rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{'animate-spin': loading}"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        Terapkan Filter
+      </button>
+    </div>
+
+    <!-- Printable Area -->
+    <div id="printable-report" class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+      
+      <!-- Report Header (Hidden unless printing/PDF) -->
+      <div class="print-header hidden mb-8 pb-4 border-b-2 border-gray-800 text-center">
+        <h1 class="text-3xl font-black uppercase text-dark mb-1" x-text="settings.business_name || 'Pinabae Studio'"></h1>
+        <h2 class="text-xl font-bold text-gray-600 mb-2">LAPORAN KEUANGAN</h2>
+        <p class="text-sm font-bold text-gray-500">
+          Periode: <span x-text="formatDate(customStart)"></span> s.d <span x-text="formatDate(customEnd)"></span>
+        </p>
+      </div>
+
+      <!-- Loading State -->
+      <div x-show="loading" class="py-20 text-center text-gray-400">
+        <svg class="animate-spin h-8 w-8 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <p>Memproses data laporan...</p>
+      </div>
+
+      <div x-show="!loading" style="display: none;" class="space-y-8">
+        
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-green-50 p-6 rounded-xl border border-green-100">
+            <p class="text-sm font-bold text-green-700 mb-1">Total Pendapatan</p>
+            <h3 class="text-2xl lg:text-3xl font-black text-green-600" x-text="formatCurrency(stats.income)"></h3>
+            <p class="text-xs text-green-600 mt-2"><span x-text="stats.incomeCount"></span> transaksi berhasil</p>
+          </div>
+          <div class="bg-red-50 p-6 rounded-xl border border-red-100">
+            <p class="text-sm font-bold text-red-700 mb-1">Total Pengeluaran</p>
+            <h3 class="text-2xl lg:text-3xl font-black text-red-600" x-text="formatCurrency(stats.expense)"></h3>
+            <p class="text-xs text-red-600 mt-2"><span x-text="stats.expenseCount"></span> transaksi</p>
+          </div>
+          <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+            <p class="text-sm font-bold text-blue-700 mb-1">Laba Bersih / Cashflow</p>
+            <h3 class="text-2xl lg:text-3xl font-black text-blue-600" x-text="formatCurrency(stats.income - stats.expense)"></h3>
+            <p class="text-xs text-blue-600 mt-2">Margin: <span class="font-bold" x-text="stats.income ? Math.round(((stats.income - stats.expense) / stats.income) * 100) + '%' : '0%'"></span></p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          <!-- Income by Category -->
+          <div>
+            <h3 class="font-bold text-dark text-sm uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Pendapatan per Layanan/Kategori</h3>
+            <div class="relative h-64 w-full flex items-center justify-center">
+              <canvas id="incomePieChart"></canvas>
+            </div>
+            
+            <div class="mt-4 space-y-2">
+              <template x-for="item in Object.values(categoryStats.income).sort((a,b) => b.total - a.total)" :key="item.name">
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-600" x-text="item.name"></span>
+                  <span class="font-bold text-dark" x-text="formatCurrency(item.total)"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Expense by Category -->
+          <div>
+            <h3 class="font-bold text-dark text-sm uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Pengeluaran per Kategori</h3>
+            <div class="relative h-64 w-full flex items-center justify-center">
+              <canvas id="expensePieChart"></canvas>
+            </div>
+            
+            <div class="mt-4 space-y-2">
+              <template x-for="item in Object.values(categoryStats.expense).sort((a,b) => b.total - a.total)" :key="item.name">
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-gray-600" x-text="item.name"></span>
+                  <span class="font-bold text-dark" x-text="formatCurrency(item.total)"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Detailed Table -->
+        <div class="mt-8">
+          <h3 class="font-bold text-dark text-sm uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Rincian Transaksi (Ringkasan)</h3>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-left whitespace-nowrap">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                  <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe</th>
+                  <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori / Keterangan</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Nominal</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <!-- Limit to 10 for on-screen report to save space, but export gives all -->
+                <template x-for="item in transactions.slice(0, 15)" :key="item.id">
+                  <tr>
+                    <td class="px-4 py-3 text-sm text-gray-600" x-text="formatDate(item.date)"></td>
+                    <td class="px-4 py-3 text-sm font-medium" :class="item.type === 'Pemasukan' ? 'text-green-600' : 'text-red-600'" x-text="item.type"></td>
+                    <td class="px-4 py-3 text-sm text-gray-800" x-text="(getCategoryName(item.category_id) || 'Umum') + ' - ' + (item.notes || '')"></td>
+                    <td class="px-4 py-3 text-sm font-bold text-right text-dark" x-text="formatCurrency(item.amount)"></td>
+                  </tr>
+                </template>
+                <tr x-show="transactions.length > 15">
+                  <td colspan="4" class="px-4 py-3 text-sm text-center text-gray-500 italic">...dan <span x-text="transactions.length - 15"></span> transaksi lainnya. Download CSV untuk rincian penuh.</td>
+                </tr>
+                <tr x-show="transactions.length === 0">
+                  <td colspan="4" class="px-4 py-8 text-sm text-center text-gray-500">Tidak ada transaksi pada rentang waktu ini.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<!-- Add a style block just for printing the report properly -->
+<style>
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #printable-report, #printable-report * {
+      visibility: visible;
+    }
+    #printable-report {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      border: none;
+      box-shadow: none;
+    }
+    .print-header {
+      display: block !important;
+    }
+  }
+</style>
+
+<script>
+  import { supabase } from '../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    
+    document.addEventListener('export-report-pdf', () => {
+      // We can use the browser's native print, which is best for A4 reports
+      window.print();
+    });
+
+    document.addEventListener('export-report-csv', () => {
+      window.dispatchEvent(new CustomEvent('alpine-export-report-csv'));
+    });
+
+    window.Alpine.data('reportsData', () => ({
+      loading: true,
+      timeFilter: 'bulan_ini',
+      customStart: '',
+      customEnd: '',
+      
+      settings: {},
+      categories: [],
+      transactions: [],
+      
+      stats: {
+        income: 0,
+        expense: 0,
+        incomeCount: 0,
+        expenseCount: 0
+      },
+      
+      categoryStats: {
+        income: {},
+        expense: {}
+      },
+      
+      incomeChart: null,
+      expenseChart: null,
+      
+      async init() {
+        this.updateDateRange();
+        await this.fetchDependencies();
+        await this.loadReport();
+        
+        window.addEventListener('alpine-export-report-csv', () => this.exportCSV());
+      },
+      
+      updateDateRange() {
+        const now = new Date();
+        let start, end;
+        
+        switch (this.timeFilter) {
+          case 'bulan_ini':
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            break;
+          case 'bulan_lalu':
+            start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            end = new Date(now.getFullYear(), now.getMonth(), 0);
+            break;
+          case 'tahun_ini':
+            start = new Date(now.getFullYear(), 0, 1);
+            end = new Date(now.getFullYear(), 11, 31);
+            break;
+          case 'custom':
+            if (!this.customStart) this.customStart = new Date().toISOString().split('T')[0];
+            if (!this.customEnd) this.customEnd = new Date().toISOString().split('T')[0];
+            return; // don't override custom dates
+        }
+        
+        if (start && end) {
+          this.customStart = start.toISOString().split('T')[0];
+          this.customEnd = end.toISOString().split('T')[0];
+        }
+      },
+
+      async fetchDependencies() {
+        const [setRes, catRes] = await Promise.all([
+          supabase.from('financial_settings').select('business_name').limit(1).single(),
+          supabase.from('transaction_categories').select('*')
+        ]);
+        this.settings = setRes.data || {};
+        this.categories = catRes.data || [];
+      },
+
+      async loadReport() {
+        if (!this.customStart || !this.customEnd) {
+          alert("Pilih tanggal awal dan akhir.");
+          return;
+        }
+        
+        this.loading = true;
+        try {
+          // Fetch transactions in range
+          const { data, error } = await supabase.from('transactions')
+            .select('*')
+            .eq('is_deleted', false)
+            .eq('status', 'Berhasil')
+            .gte('date', this.customStart)
+            .lte('date', this.customEnd)
+            .order('date', { ascending: false });
+            
+          if (error) throw error;
+          
+          this.transactions = data || [];
+          this.processData();
+          
+        } catch (error) {
+          console.error("Error loading report:", error);
+          alert("Gagal memuat laporan.");
+        } finally {
+          this.loading = false;
+        }
+      },
+      
+      processData() {
+        // Reset stats
+        this.stats = { income: 0, expense: 0, incomeCount: 0, expenseCount: 0 };
+        this.categoryStats = { income: {}, expense: {} };
+        
+        // Build category map
+        this.categories.forEach(c => {
+          if (c.type === 'Pemasukan') this.categoryStats.income[c.id] = { name: c.name, total: 0 };
+          else this.categoryStats.expense[c.id] = { name: c.name, total: 0 };
+        });
+        
+        this.categoryStats.income['other'] = { name: 'Lain-lain', total: 0 };
+        this.categoryStats.expense['other'] = { name: 'Lain-lain', total: 0 };
+        
+        // Calculate
+        this.transactions.forEach(t => {
+          const amount = Number(t.amount);
+          if (t.type === 'Pemasukan') {
+            this.stats.income += amount;
+            this.stats.incomeCount++;
+            if (t.category_id && this.categoryStats.income[t.category_id]) {
+              this.categoryStats.income[t.category_id].total += amount;
+            } else {
+              this.categoryStats.income['other'].total += amount;
+            }
+          } else {
+            this.stats.expense += amount;
+            this.stats.expenseCount++;
+            if (t.category_id && this.categoryStats.expense[t.category_id]) {
+              this.categoryStats.expense[t.category_id].total += amount;
+            } else {
+              this.categoryStats.expense['other'].total += amount;
+            }
+          }
+        });
+        
+        this.renderCharts();
+      },
+      
+      renderCharts() {
+        if (!window.Chart) return;
+        
+        // Colors
+        const incomeColors = ['#10b981', '#34d399', '#6ee7b7', '#059669', '#047857', '#a7f3d0'];
+        const expenseColors = ['#ef4444', '#f87171', '#fca5a5', '#dc2626', '#b91c1c', '#fecaca'];
+        
+        // Prepare Income Data
+        const incData = Object.values(this.categoryStats.income).filter((c) => c.total > 0).sort((a, b) => b.total - a.total);
+        const incLabels = incData.map((c) => c.name);
+        const incValues = incData.map((c) => c.total);
+        
+        // Prepare Expense Data
+        const expData = Object.values(this.categoryStats.expense).filter((c) => c.total > 0).sort((a, b) => b.total - a.total);
+        const expLabels = expData.map((c) => c.name);
+        const expValues = expData.map((c) => c.total);
+        
+        // Income Chart
+        const ctxInc = document.getElementById('incomePieChart');
+        if (ctxInc) {
+          if (this.incomeChart) this.incomeChart.destroy();
+          if (incValues.length > 0) {
+            this.incomeChart = new window.Chart(ctxInc, {
+              type: 'doughnut',
+              data: { labels: incLabels, datasets: [{ data: incValues, backgroundColor: incomeColors }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', display: false } } }
+            });
+          }
+        }
+        
+        // Expense Chart
+        const ctxExp = document.getElementById('expensePieChart');
+        if (ctxExp) {
+          if (this.expenseChart) this.expenseChart.destroy();
+          if (expValues.length > 0) {
+            this.expenseChart = new window.Chart(ctxExp, {
+              type: 'doughnut',
+              data: { labels: expLabels, datasets: [{ data: expValues, backgroundColor: expenseColors }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', display: false } } }
+            });
+          }
+        }
+      },
+
+      getCategoryName(id) {
+        if (!id) return '';
+        const cat = this.categories.find(c => c.id === id);
+        return cat ? cat.name : '';
+      },
+
+      formatCurrency(val) {
+        if (val === undefined || val === null) return 'Rp 0';
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+      },
+      
+      formatDate(dateStr) {
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      },
+      
+      exportCSV() {
+        if (this.transactions.length === 0) {
+          alert("Tidak ada data laporan untuk diexport.");
+          return;
+        }
+        
+        const headers = ["Tanggal", "Jenis", "Kategori", "Nominal", "Catatan"];
+        const rows = this.transactions.map(item => [
+          item.date,
+          item.type,
+          this.getCategoryName(item.category_id),
+          item.amount,
+          (item.notes || '').replace(/,/g, '') // prevent CSV break
+        ]);
+        
+        let csvContent = "data:text/csv;charset=utf-8," 
+          + headers.join(",") + "\n"
+          + rows.map(e => e.join(",")).join("\n");
+          
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Laporan_Keuangan_${this.customStart}_to_${this.customEnd}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }));
+  });
+</script>

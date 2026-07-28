@@ -15,10 +15,12 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     </a>
   </div>
 
-  <form x-data="createServiceData()" @submit.prevent="saveService" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+  <form x-data="createServiceData()" @submit.prevent="saveService" class="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12">
     <!-- Main Content Area -->
-    <div class="lg:col-span-2 space-y-6">
+    <div class="lg:col-span-7 xl:col-span-8 space-y-6">
       <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Informasi Utama</h2>
+        
         <div class="mb-6">
           <label class="block text-sm font-bold text-dark mb-2">Nama Layanan <span class="text-red-500">*</span></label>
           <input type="text" x-model="item.title" @input="generateSlug" class="w-full px-4 py-3 text-lg font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" required placeholder="Contoh: Website Company Profile">
@@ -31,22 +33,108 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
         <div class="mb-6 grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-bold text-dark mb-2">Teks Badge (Label)</label>
-            <input type="text" x-model="item.badge_text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Contoh: Cocok untuk UMKM">
-          </div>
-          <div>
             <label class="block text-sm font-bold text-dark mb-2">Nama Icon (Lucide)</label>
             <input type="text" x-model="item.icon" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Contoh: building-2">
             <p class="text-xs text-gray-500 mt-1">Gunakan nama dari <a href="https://lucide.dev/icons/" target="_blank" class="text-primary hover:underline">Lucide Icons</a>.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-dark mb-2">Harga Mulai Dari</label>
+            <input type="text" x-model="item.price_starts_from" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Contoh: Rp 1.500.000">
+          </div>
+        </div>
+      </div>
+
+      <!-- Badges Array -->
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Badge Kategori (Cocok Untuk)</h2>
+        <div class="mb-4">
+          <div class="flex gap-2">
+            <input type="text" x-model="newBadge" @keydown.enter.prevent="addBadge" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Contoh: UMKM">
+            <button type="button" @click="addBadge" class="px-4 py-2 bg-gray-100 text-dark font-medium rounded-lg hover:bg-gray-200">Tambah</button>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Tekan Enter untuk menambah badge.</p>
+        </div>
+        
+        <div class="flex flex-wrap gap-2">
+          <template x-for="(badge, index) in item.badges" :key="index">
+            <div class="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-primary text-sm font-medium rounded-full border border-orange-100">
+              <span x-text="badge"></span>
+              <button type="button" @click="removeBadge(index)" class="text-primary hover:text-red-500 ml-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+          </template>
+          <div x-show="item.badges.length === 0" class="text-sm text-gray-400">Belum ada badge ditambahkan.</div>
+        </div>
+      </div>
+
+      <!-- Benefits Array -->
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Benefit Layanan</h2>
+        <div class="mb-4">
+          <div class="flex gap-2">
+            <input type="text" x-model="newBenefit" @keydown.enter.prevent="addBenefit" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Contoh: Meningkatkan kredibilitas bisnis">
+            <button type="button" @click="addBenefit" class="px-4 py-2 bg-gray-100 text-dark font-medium rounded-lg hover:bg-gray-200">Tambah</button>
+          </div>
+        </div>
+        
+        <div class="space-y-2">
+          <template x-for="(benefit, index) in item.benefits" :key="index">
+            <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <div class="flex items-center gap-3">
+                <span class="text-gray-400 font-mono text-xs" x-text="(index+1)+'.'"></span>
+                <span class="text-sm text-dark font-medium" x-text="benefit"></span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" @click="moveBenefit(index, -1)" :disabled="index === 0" class="p-1 text-gray-400 hover:text-dark disabled:opacity-30">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                </button>
+                <button type="button" @click="moveBenefit(index, 1)" :disabled="index === item.benefits.length - 1" class="p-1 text-gray-400 hover:text-dark disabled:opacity-30">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <button type="button" @click="removeBenefit(index)" class="p-1 text-gray-400 hover:text-red-500 ml-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </div>
+          </template>
+          <div x-show="item.benefits.length === 0" class="text-sm text-gray-400 p-3 text-center border border-dashed border-gray-200 rounded-lg">Belum ada benefit ditambahkan.</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Pengaturan Tambahan</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-bold text-dark mb-2">Teks Tombol CTA</label>
+            <input type="text" x-model="item.cta_text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Pelajari Lebih Lanjut">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-dark mb-2">Link Tombol CTA (Opsional)</label>
+            <input type="text" x-model="item.cta_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none" placeholder="Kosongkan untuk link ke detail">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-dark mb-2">Urutan Tampil (Angka)</label>
+            <input type="number" x-model="item.order_index" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none">
+          </div>
+          <div class="flex items-center h-full pt-6">
+            <label class="flex items-center cursor-pointer">
+              <div class="relative">
+                <input type="checkbox" x-model="item.is_active" class="sr-only">
+                <div class="block bg-gray-200 w-10 h-6 rounded-full transition-colors" :class="{'bg-primary': item.is_active}"></div>
+                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" :class="{'transform translate-x-4': item.is_active}"></div>
+              </div>
+              <div class="ml-3 text-sm font-bold text-dark">Layanan Aktif</div>
+            </label>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Sidebar -->
-    <div class="space-y-6">
+    <div class="lg:col-span-5 xl:col-span-4 space-y-6">
       <!-- Publish Box -->
-      <div class="bg-white p-6 rounded-xl border border-border shadow-sm">
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm sticky top-24 z-10">
         <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Simpan</h2>
         <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors flex justify-center items-center gap-2 shadow-sm shadow-orange-500/20" :disabled="submitting">
           <span x-show="!submitting">Simpan Layanan</span>
@@ -63,6 +151,57 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
         <input type="text" x-model="item.slug" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-sm bg-gray-50" required>
         <p class="text-xs text-gray-500 mt-1">URL otomatis dari judul.</p>
       </div>
+
+      <!-- Live Preview -->
+      <div class="bg-white p-6 rounded-xl border border-border shadow-sm hidden md:block">
+        <h2 class="text-lg font-bold text-dark mb-4 border-b border-gray-100 pb-2">Live Preview Card</h2>
+        
+        <!-- Replica of the Frontend Card -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-lg relative overflow-hidden transition-all duration-300 transform scale-[0.9] origin-top">
+          <!-- Icon & Badges -->
+          <div class="flex flex-col gap-4 items-start mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center">
+              <i :data-lucide="item.icon || 'box'" class="text-primary w-7 h-7"></i>
+            </div>
+            
+            <div class="flex flex-wrap gap-1">
+              <template x-for="badge in item.badges">
+                <span class="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-[10px] font-bold uppercase tracking-wider rounded-full" x-text="badge"></span>
+              </template>
+              <template x-if="item.badges.length === 0 && item.badge_text">
+                 <span class="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-[10px] font-bold uppercase tracking-wider rounded-full" x-text="item.badge_text"></span>
+              </template>
+            </div>
+          </div>
+          
+          <h3 class="text-xl font-bold text-dark mb-3 tracking-tight" x-text="item.title || 'Nama Layanan'"></h3>
+          <p class="text-text text-sm leading-relaxed mb-6 line-clamp-3" x-text="item.description || 'Deskripsi singkat layanan akan tampil di sini...'"></p>
+          
+          <!-- Benefits -->
+          <div class="space-y-2 mb-6">
+            <template x-for="benefit in (item.benefits.length > 0 ? item.benefits.slice(0,3) : ['Benefit contoh 1', 'Benefit contoh 2'])">
+              <div class="flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-green-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span class="text-xs font-medium text-gray-700 leading-tight" x-text="benefit"></span>
+              </div>
+            </template>
+            <div x-show="item.benefits.length > 3" class="text-xs text-gray-400 font-medium italic" x-text="'+ ' + (item.benefits.length - 3) + ' benefit lainnya'"></div>
+          </div>
+
+          <!-- Price -->
+          <div class="mb-6">
+            <p class="text-xs text-gray-500 font-medium mb-1">Mulai Dari</p>
+            <div class="text-lg font-extrabold text-primary" x-text="item.price_starts_from || 'Rp -'"></div>
+          </div>
+          
+          <!-- CTA -->
+          <div class="w-full py-3 bg-gray-50 text-dark text-sm font-semibold rounded-xl border border-gray-200 text-center">
+            <span x-text="item.cta_text || 'Pelajari Lebih Lanjut'"></span>
+          </div>
+        </div>
+        <p class="text-[10px] text-gray-400 text-center mt-2">* Tampilan ini adalah perkiraan (preview)</p>
+      </div>
+
     </div>
   </form>
 </AdminLayout>
@@ -73,12 +212,67 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
   document.addEventListener('alpine:init', () => {
     window.Alpine.data('createServiceData', () => ({
       submitting: false,
+      newBadge: '',
+      newBenefit: '',
       item: {
         title: '',
         slug: '',
         description: '',
         badge_text: '',
-        icon: 'box'
+        icon: 'box',
+        price_starts_from: '',
+        badges: [],
+        benefits: [],
+        cta_text: 'Pelajari Lebih Lanjut',
+        cta_link: '',
+        order_index: 0,
+        is_active: true
+      },
+
+      init() {
+        // Trigger lucide icons refresh on data change
+        this.$watch('item.icon', () => {
+          setTimeout(() => {
+            if (window.lucide) window.lucide.createIcons();
+          }, 50);
+        });
+      },
+
+      addBadge() {
+        if (this.newBadge.trim()) {
+          this.item.badges.push(this.newBadge.trim());
+          // Also set legacy badge_text to first badge if empty
+          if (!this.item.badge_text) this.item.badge_text = this.item.badges[0];
+          this.newBadge = '';
+        }
+      },
+      
+      removeBadge(index) {
+        this.item.badges.splice(index, 1);
+        if (this.item.badges.length > 0) {
+           this.item.badge_text = this.item.badges[0];
+        } else {
+           this.item.badge_text = '';
+        }
+      },
+
+      addBenefit() {
+        if (this.newBenefit.trim()) {
+          this.item.benefits.push(this.newBenefit.trim());
+          this.newBenefit = '';
+        }
+      },
+      
+      removeBenefit(index) {
+        this.item.benefits.splice(index, 1);
+      },
+      
+      moveBenefit(index, direction) {
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= this.item.benefits.length) return;
+        const temp = this.item.benefits[newIndex];
+        this.item.benefits[newIndex] = this.item.benefits[index];
+        this.item.benefits[index] = temp;
       },
 
       generateSlug() {
@@ -97,22 +291,44 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
         this.submitting = true;
         try {
+          // Attempt full insert first
           const { error } = await supabase
             .from('services')
             .insert([this.item]);
 
           if (error) {
-            if (error.code === '42P01') {
+            // Check if error is due to missing columns (42703 in Postgres means undefined_column)
+            if (error.code === '42703' || error.message.includes('column') || error.message.includes('does not exist')) {
+              console.warn("New columns not found in DB. Falling back to old schema.");
+              
+              const fallbackItem = {
+                title: this.item.title,
+                slug: this.item.slug,
+                description: this.item.description,
+                badge_text: this.item.badges.length > 0 ? this.item.badges[0] : this.item.badge_text,
+                icon: this.item.icon
+              };
+
+              const { error: fallbackError } = await supabase
+                .from('services')
+                .insert([fallbackItem]);
+
+              if (fallbackError) throw fallbackError;
+              
+              alert('Layanan berhasil disimpan (Data Terbatas). Beberapa field baru tidak tersimpan karena database belum dimigrasi. Hubungi Admin (Jalankan SQL Migration).');
+            } else if (error.code === '42P01') {
               alert('Tabel "services" belum ada di Supabase. Harap buat tabelnya terlebih dahulu.');
+              return;
             } else if (error.code === '23505') {
               alert('Slug sudah digunakan.');
+              return;
             } else {
               throw error;
             }
-            return;
+          } else {
+             alert('Berhasil menyimpan layanan!');
           }
 
-          alert('Berhasil menyimpan layanan!');
           window.location.href = '/admin/services';
         } catch (error: any) {
           console.error('Error saving service:', error);

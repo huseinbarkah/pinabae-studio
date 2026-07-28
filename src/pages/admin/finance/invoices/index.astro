@@ -1,0 +1,652 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Invoice | Modul Keuangan">
+  <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-dark">Manajemen Invoice</h1>
+      <p class="text-text">Buat, kelola, dan cetak invoice untuk klien.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="document.dispatchEvent(new CustomEvent('open-invoice-modal'))" class="px-4 py-2 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors flex items-center gap-2 shadow-sm shadow-orange-500/20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 18a3 3 0 1 0-6 0"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><circle cx="12" cy="13" r="2"/></svg>
+        Buat Invoice
+      </button>
+    </div>
+  </div>
+
+  <div x-data="invoicesData()" class="space-y-6">
+    <!-- Filters & Search -->
+    <div class="bg-white p-4 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center z-10 sticky top-0">
+      <div class="relative w-full md:w-80">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" x-model="searchQuery" @input="filterItems" placeholder="Cari no invoice atau klien..." class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none">
+      </div>
+      <div class="flex flex-wrap md:flex-nowrap gap-2 w-full md:w-auto">
+        <select x-model="statusFilter" @change="filterItems" class="px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none w-full md:w-auto">
+          <option value="all">Semua Status</option>
+          <option value="Draft">Draft</option>
+          <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
+          <option value="Sebagian Dibayar">Sebagian Dibayar</option>
+          <option value="Lunas">Lunas</option>
+        </select>
+        <button @click="loadItems()" class="p-2 text-gray-500 border border-gray-300 rounded-lg hover:text-primary hover:border-primary transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{'animate-spin': loading}"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+      <!-- Loading State -->
+      <div x-show="loading" class="p-12 text-center text-gray-400">
+        <svg class="animate-spin h-8 w-8 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <p>Memuat data invoice...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div x-show="!loading && filteredItems.length === 0" class="p-12 text-center text-gray-500" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-gray-300"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 18a3 3 0 1 0-6 0"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><circle cx="12" cy="13" r="2"/></svg>
+        <p class="text-lg font-medium text-dark mb-1">Belum ada invoice</p>
+        <p class="text-sm">Silakan buat invoice baru untuk klien Anda.</p>
+      </div>
+
+      <div class="overflow-x-auto" x-show="!loading && filteredItems.length > 0" style="display: none;">
+        <table class="w-full text-left whitespace-nowrap">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">No. Invoice & Klien</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal & Jatuh Tempo</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total & Status</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <template x-for="item in filteredItems" :key="item.id">
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="font-bold text-primary" x-text="item.invoice_number"></div>
+                  <div class="text-sm font-medium text-dark mt-1" x-text="getClientName(item.client_id)"></div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-500">Tgl: <span class="text-dark font-medium" x-text="formatDate(item.date)"></span></div>
+                  <div class="text-sm text-gray-500 mt-1" :class="isOverdue(item) ? 'text-red-500 font-bold' : ''">Tempo: <span x-text="formatDate(item.due_date)"></span></div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="font-bold text-lg text-dark" x-text="formatCurrency(item.grand_total)"></div>
+                  <div class="mt-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold" 
+                          :class="{
+                            'bg-gray-100 text-gray-700': item.status === 'Draft',
+                            'bg-yellow-100 text-yellow-700': item.status === 'Menunggu Pembayaran',
+                            'bg-blue-100 text-blue-700': item.status === 'Sebagian Dibayar',
+                            'bg-green-100 text-green-700': item.status === 'Lunas'
+                          }" x-text="item.status"></span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button @click="previewInvoice(item)" class="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-all" title="Preview / Cetak PDF">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button @click="openEditModal(item)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                    <button @click="deleteItem(item.id)" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Invoice Form Modal (Large) -->
+    <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeModal()"></div>
+      <div class="bg-white w-full max-w-5xl rounded-2xl shadow-xl z-10 mx-4 h-[90vh] flex flex-col" x-transition.scale.origin.bottom>
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+          <h3 class="text-xl font-bold text-dark" x-text="isEdit ? 'Edit Invoice' : 'Buat Invoice Baru'"></h3>
+          <button @click="closeModal()" class="text-gray-400 hover:text-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto flex-grow bg-gray-50/50">
+          <form @submit.prevent="saveItem" id="invoiceForm" class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            <!-- Header Section -->
+            <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <div>
+                <label class="block text-sm font-bold text-dark mb-1">Nomor Invoice <span class="text-red-500">*</span></label>
+                <input type="text" x-model="form.invoice_number" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none font-mono text-primary font-bold">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-bold text-dark mb-1">Klien <span class="text-red-500">*</span></label>
+                <select x-model="form.client_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white">
+                  <option value="">Pilih Klien</option>
+                  <template x-for="client in clients" :key="client.id">
+                    <option :value="client.id" x-text="client.name + (client.company ? ' - ' + client.company : '')"></option>
+                  </template>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-dark mb-1">Status</label>
+                <select x-model="form.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white font-bold" :class="{'text-green-600': form.status === 'Lunas', 'text-yellow-600': form.status === 'Menunggu Pembayaran'}">
+                  <option value="Draft">Draft</option>
+                  <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
+                  <option value="Sebagian Dibayar">Sebagian Dibayar</option>
+                  <option value="Lunas">Lunas</option>
+                </select>
+                <p x-show="form.status === 'Lunas'" class="text-xs text-green-600 mt-1">Trans. Pemasukan akan tercatat otomatis.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-dark mb-1">Tanggal Terbit <span class="text-red-500">*</span></label>
+                <input type="date" x-model="form.date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-dark mb-1">Jatuh Tempo</label>
+                <input type="date" x-model="form.due_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none">
+              </div>
+            </div>
+
+            <!-- Items Section -->
+            <div class="md:col-span-12 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <h4 class="font-bold text-dark text-sm uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Detail Item</h4>
+              
+              <div class="overflow-x-auto mb-4">
+                <table class="w-full text-left">
+                  <thead class="bg-gray-50 border-y border-gray-200">
+                    <tr>
+                      <th class="px-4 py-2 text-xs font-semibold text-gray-500 w-1/2">Deskripsi Layanan</th>
+                      <th class="px-4 py-2 text-xs font-semibold text-gray-500 w-24">Qty</th>
+                      <th class="px-4 py-2 text-xs font-semibold text-gray-500 w-48">Harga Satuan (Rp)</th>
+                      <th class="px-4 py-2 text-xs font-semibold text-gray-500 w-48">Total</th>
+                      <th class="px-2 py-2 text-xs font-semibold text-gray-500 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100">
+                    <template x-for="(item, index) in form.items" :key="index">
+                      <tr>
+                        <td class="py-2 px-2">
+                          <input type="text" x-model="item.description" required class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-primary outline-none text-sm" placeholder="Nama layanan / produk">
+                        </td>
+                        <td class="py-2 px-2">
+                          <input type="number" x-model="item.qty" @input="calculateTotals" min="1" step="0.1" required class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-primary outline-none text-sm text-center">
+                        </td>
+                        <td class="py-2 px-2">
+                          <input type="number" x-model="item.price" @input="calculateTotals" required class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-primary outline-none text-sm text-right">
+                        </td>
+                        <td class="py-2 px-4 text-right font-medium text-dark text-sm" x-text="formatCurrency(item.qty * item.price)"></td>
+                        <td class="py-2 px-2 text-center">
+                          <button type="button" @click="removeItem(index)" class="text-red-400 hover:text-red-600" title="Hapus Item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" @click="addItem" class="px-3 py-1.5 bg-orange-50 text-primary border border-orange-200 text-sm font-bold rounded hover:bg-orange-100 transition-colors flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Tambah Baris
+              </button>
+            </div>
+
+            <!-- Footer / Totals -->
+            <div class="md:col-span-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <label class="block text-sm font-bold text-dark mb-1">Catatan Invoice (Klien)</label>
+              <textarea x-model="form.notes" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none text-sm" placeholder="Terima kasih atas kepercayaan Anda..."></textarea>
+            </div>
+            
+            <div class="md:col-span-6 bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600 font-medium">Subtotal</span>
+                  <span class="font-bold text-dark" x-text="formatCurrency(form.subtotal)"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600 font-medium">Diskon (Rp)</span>
+                  <input type="number" x-model="form.discount" @input="calculateTotals" class="w-32 px-2 py-1 text-right border border-gray-300 rounded outline-none">
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600 font-medium flex items-center gap-2">
+                    Pajak (%)
+                    <input type="number" x-model="form.tax_rate" @input="calculateTotals" class="w-16 px-1 py-1 text-center border border-gray-300 rounded outline-none text-xs">
+                  </span>
+                  <span class="font-medium text-gray-800" x-text="'+ ' + formatCurrency(form.tax_amount)"></span>
+                </div>
+                <div class="pt-3 border-t border-gray-300 flex justify-between items-center">
+                  <span class="text-lg font-black text-dark">Total Tagihan</span>
+                  <span class="text-2xl font-black text-primary" x-text="formatCurrency(form.grand_total)"></span>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+        
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
+          <button type="button" @click="closeModal()" class="px-5 py-2.5 bg-gray-200 text-dark font-bold rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+          <button type="submit" form="invoiceForm" class="px-5 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2" :disabled="submitting || form.items.length === 0">
+            <span x-show="!submitting">Simpan Invoice</span>
+            <span x-show="submitting" style="display: none;">Menyimpan...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview/PDF Modal -->
+    <div x-show="previewOpen" style="display: none;" class="fixed inset-0 z-[60] flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="closePreview()"></div>
+      <div class="bg-white w-full max-w-4xl rounded-xl shadow-2xl z-10 mx-4 h-[95vh] flex flex-col" x-transition.scale.origin.center>
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-xl">
+          <h3 class="font-bold text-dark">Preview Invoice</h3>
+          <div class="flex items-center gap-2">
+            <button @click="downloadPDF()" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-bold rounded shadow hover:bg-blue-700 transition-colors flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              Download PDF
+            </button>
+            <button @click="sendWhatsApp()" class="px-4 py-1.5 bg-green-500 text-white text-sm font-bold rounded shadow hover:bg-green-600 transition-colors flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Kirim WA
+            </button>
+            <button @click="closePreview()" class="p-2 ml-2 text-gray-400 hover:text-dark">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="flex-grow overflow-y-auto bg-gray-300 p-8 flex justify-center">
+          <!-- A4 Paper Template -->
+          <div id="invoice-pdf-content" class="bg-white w-[210mm] min-h-[297mm] p-12 shadow-md mx-auto font-sans relative" style="box-sizing: border-box;">
+            <!-- Header -->
+            <div class="flex justify-between items-start border-b-2 border-gray-800 pb-6 mb-8">
+              <div>
+                <template x-if="settings.logo_url">
+                  <img :src="settings.logo_url" alt="Logo" class="h-12 mb-4 object-contain">
+                </template>
+                <template x-if="!settings.logo_url">
+                  <h1 class="text-3xl font-black tracking-tighter text-gray-900 mb-2" x-text="settings.business_name || 'PINABAE STUDIO'"></h1>
+                </template>
+                <p class="text-sm text-gray-600 max-w-[250px] leading-relaxed" x-text="settings.address || 'Alamat perusahaan'"></p>
+              </div>
+              <div class="text-right">
+                <h2 class="text-4xl font-black text-gray-200 uppercase tracking-widest mb-4">INVOICE</h2>
+                <p class="text-sm font-bold text-gray-900 mb-1">NO. <span x-text="previewData.invoice_number"></span></p>
+                <p class="text-sm text-gray-600">Tgl: <span x-text="formatDate(previewData.date)"></span></p>
+                <p class="text-sm text-gray-600">Tempo: <span x-text="formatDate(previewData.due_date)"></span></p>
+                <div class="mt-3 inline-block px-3 py-1 bg-gray-100 rounded text-xs font-bold uppercase tracking-wider" x-text="previewData.status" :class="previewData.status === 'Lunas' ? 'text-green-600 bg-green-50' : 'text-gray-700'"></div>
+              </div>
+            </div>
+
+            <!-- Bill To -->
+            <div class="mb-10">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ditagihkan Kepada:</p>
+              <h3 class="text-lg font-bold text-gray-900" x-text="getClientName(previewData.client_id)"></h3>
+              <p class="text-sm text-gray-600 mt-1" x-text="getClientCompany(previewData.client_id)"></p>
+              <p class="text-sm text-gray-600" x-text="getClientAddress(previewData.client_id)"></p>
+            </div>
+
+            <!-- Items Table -->
+            <table class="w-full text-left mb-10 border-collapse">
+              <thead>
+                <tr class="border-b-2 border-gray-800">
+                  <th class="py-3 text-sm font-bold text-gray-900">Deskripsi</th>
+                  <th class="py-3 text-sm font-bold text-gray-900 text-center w-20">Qty</th>
+                  <th class="py-3 text-sm font-bold text-gray-900 text-right w-32">Harga</th>
+                  <th class="py-3 text-sm font-bold text-gray-900 text-right w-32">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="item in previewData.items" :key="item.description">
+                  <tr class="border-b border-gray-200">
+                    <td class="py-4 text-sm text-gray-800" x-text="item.description"></td>
+                    <td class="py-4 text-sm text-gray-800 text-center" x-text="item.qty"></td>
+                    <td class="py-4 text-sm text-gray-800 text-right" x-text="formatCurrency(item.price)"></td>
+                    <td class="py-4 text-sm text-gray-900 font-medium text-right" x-text="formatCurrency(item.qty * item.price)"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+
+            <!-- Totals -->
+            <div class="flex justify-end mb-12">
+              <div class="w-1/2 md:w-1/3">
+                <div class="flex justify-between py-2 text-sm text-gray-600 border-b border-gray-100">
+                  <span>Subtotal</span>
+                  <span class="font-medium text-gray-900" x-text="formatCurrency(previewData.subtotal)"></span>
+                </div>
+                <div class="flex justify-between py-2 text-sm text-gray-600 border-b border-gray-100" x-show="previewData.discount > 0">
+                  <span>Diskon</span>
+                  <span class="font-medium text-red-600" x-text="'- ' + formatCurrency(previewData.discount)"></span>
+                </div>
+                <div class="flex justify-between py-2 text-sm text-gray-600 border-b border-gray-100" x-show="previewData.tax_amount > 0">
+                  <span>Pajak (<span x-text="previewData.tax_rate"></span>%)</span>
+                  <span class="font-medium text-gray-900" x-text="formatCurrency(previewData.tax_amount)"></span>
+                </div>
+                <div class="flex justify-between py-3 text-base font-black text-gray-900 border-t-2 border-gray-800 mt-2">
+                  <span>GRAND TOTAL</span>
+                  <span x-text="formatCurrency(previewData.grand_total)"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes & Bank Info -->
+            <div class="absolute bottom-12 left-12 right-12 flex justify-between items-end border-t border-gray-200 pt-6">
+              <div class="w-1/2">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Catatan Tambahan:</p>
+                <p class="text-sm text-gray-600 whitespace-pre-line" x-text="previewData.notes || 'Terima kasih atas kerjasama Anda.'"></p>
+              </div>
+              <div class="w-1/2 text-right">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Informasi Pembayaran:</p>
+                <p class="text-sm text-gray-800 font-medium whitespace-pre-line" x-text="settings.bank_account"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { supabase } from '../../../../lib/supabase';
+
+  document.addEventListener('alpine:init', () => {
+    
+    document.addEventListener('open-invoice-modal', () => {
+      window.dispatchEvent(new CustomEvent('alpine-open-inv-modal'));
+    });
+
+    window.Alpine.data('invoicesData', () => ({
+      items: [],
+      filteredItems: [],
+      clients: [],
+      settings: {},
+      
+      searchQuery: '',
+      statusFilter: 'all',
+      loading: true,
+      
+      modalOpen: false,
+      previewOpen: false,
+      isEdit: false,
+      submitting: false,
+      
+      form: {
+        id: null, invoice_number: '', client_id: '', date: '', due_date: '',
+        status: 'Draft', subtotal: 0, tax_rate: 0, tax_amount: 0, discount: 0,
+        grand_total: 0, notes: '',
+        items: []
+      },
+      
+      previewData: { items: [] },
+
+      async init() {
+        await Promise.all([
+          this.fetchDependencies(),
+          this.loadItems()
+        ]);
+        window.addEventListener('alpine-open-inv-modal', () => this.openCreateModal());
+      },
+
+      async fetchDependencies() {
+        const [cliRes, setRes] = await Promise.all([
+          supabase.from('clients').select('*').eq('is_deleted', false),
+          supabase.from('financial_settings').select('*').limit(1).single()
+        ]);
+        this.clients = cliRes.data || [];
+        this.settings = setRes.data || { invoice_prefix: 'INV-', tax_percentage: 0 };
+      },
+
+      async loadItems() {
+        this.loading = true;
+        try {
+          const { data, error } = await supabase
+            .from('invoices')
+            .select(`
+              *,
+              invoice_items (*)
+            `)
+            .eq('is_deleted', false)
+            .order('created_at', { ascending: false });
+            
+          if (error) throw error;
+          this.items = data || [];
+          this.filterItems();
+        } catch (error) {
+          console.error('Error:', error);
+          if (error.code === '42P01') {
+            alert('Tabel invoices belum ada. Harap jalankan migrasi SQL.');
+          }
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      filterItems() {
+        let result = this.items;
+        
+        if (this.statusFilter !== 'all') {
+          result = result.filter(item => item.status === this.statusFilter);
+        }
+        
+        if (this.searchQuery) {
+          const q = this.searchQuery.toLowerCase();
+          result = result.filter(item => {
+            const clientName = this.getClientName(item.client_id).toLowerCase();
+            return item.invoice_number.toLowerCase().includes(q) || clientName.includes(q);
+          });
+        }
+        
+        this.filteredItems = result;
+      },
+
+      getClientName(id) {
+        const client = this.clients.find(c => c.id === id);
+        return client ? client.name : 'Unknown';
+      },
+      
+      getClientCompany(id) {
+        const client = this.clients.find(c => c.id === id);
+        return client ? client.company : '';
+      },
+      
+      getClientAddress(id) {
+        const client = this.clients.find(c => c.id === id);
+        return client ? client.address : '';
+      },
+      
+      getClientPhone(id) {
+        const client = this.clients.find(c => c.id === id);
+        return client ? client.phone : '';
+      },
+
+      formatCurrency(val) {
+        if (val === undefined || val === null) return 'Rp 0';
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+      },
+      
+      formatDate(dateStr) {
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+      },
+      
+      isOverdue(item) {
+        if (item.status === 'Lunas' || !item.due_date) return false;
+        return new Date(item.due_date) < new Date();
+      },
+
+      generateInvoiceNumber() {
+        const date = new Date();
+        const yymm = date.getFullYear().toString().slice(2) + (date.getMonth() + 1).toString().padStart(2, '0');
+        const rand = Math.floor(100 + Math.random() * 900); // Simple 3 digit random for now
+        return `${this.settings.invoice_prefix}${yymm}-${rand}`;
+      },
+
+      openCreateModal() {
+        this.isEdit = false;
+        this.form = {
+          id: null, 
+          invoice_number: this.generateInvoiceNumber(), 
+          client_id: '', 
+          date: new Date().toISOString().split('T')[0], 
+          due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +14 days
+          status: 'Draft', subtotal: 0, tax_rate: this.settings.tax_percentage || 0, tax_amount: 0, discount: 0,
+          grand_total: 0, notes: '',
+          items: [{ description: '', qty: 1, price: 0 }]
+        };
+        this.modalOpen = true;
+      },
+
+      openEditModal(item) {
+        this.isEdit = true;
+        this.form = { ...item };
+        if (this.form.date) this.form.date = this.form.date.split('T')[0];
+        if (this.form.due_date) this.form.due_date = this.form.due_date.split('T')[0];
+        this.form.items = item.invoice_items ? JSON.parse(JSON.stringify(item.invoice_items)) : [];
+        if (this.form.items.length === 0) this.addItem();
+        this.modalOpen = true;
+      },
+
+      closeModal() {
+        this.modalOpen = false;
+      },
+
+      addItem() {
+        this.form.items.push({ description: '', qty: 1, price: 0 });
+      },
+      
+      removeItem(index) {
+        this.form.items.splice(index, 1);
+        this.calculateTotals();
+      },
+      
+      calculateTotals() {
+        let subtotal = 0;
+        this.form.items.forEach(item => {
+          subtotal += (Number(item.qty) * Number(item.price));
+        });
+        this.form.subtotal = subtotal;
+        
+        const discounted = subtotal - Number(this.form.discount);
+        this.form.tax_amount = (discounted * Number(this.form.tax_rate)) / 100;
+        this.form.grand_total = discounted + this.form.tax_amount;
+      },
+
+      async saveItem() {
+        this.submitting = true;
+        this.calculateTotals(); // Ensure correct
+        
+        try {
+          const payload = { ...this.form };
+          const items = [...payload.items];
+          const id = payload.id;
+          const oldStatus = this.isEdit ? this.items.find(i => i.id === id)?.status : null;
+          
+          delete payload.id; 
+          delete payload.items; // items go to separate table
+          delete payload.invoice_items; // clean from fetch
+          
+          let savedInvoice;
+
+          if (this.isEdit) {
+            const { data, error } = await supabase.from('invoices').update(payload).eq('id', id).select().single();
+            if (error) throw error;
+            savedInvoice = data;
+            
+            // Delete old items and re-insert
+            await supabase.from('invoice_items').delete().eq('invoice_id', id);
+            const itemsPayload = items.map(i => ({ ...i, invoice_id: id, total: i.qty * i.price }));
+            await supabase.from('invoice_items').insert(itemsPayload);
+            
+          } else {
+            const { data, error } = await supabase.from('invoices').insert([payload]).select().single();
+            if (error) throw error;
+            savedInvoice = data;
+            
+            const itemsPayload = items.map(i => ({ ...i, invoice_id: savedInvoice.id, total: i.qty * i.price }));
+            await supabase.from('invoice_items').insert(itemsPayload);
+          }
+          
+          // Logic: Auto-create Transaction if changed to Lunas
+          if (payload.status === 'Lunas' && oldStatus !== 'Lunas') {
+            await supabase.from('transactions').insert([{
+              date: new Date().toISOString().split('T')[0],
+              type: 'Pemasukan',
+              client_id: payload.client_id,
+              amount: payload.grand_total,
+              payment_method: 'Transfer',
+              status: 'Berhasil',
+              notes: 'Auto-generated from Invoice ' + payload.invoice_number,
+              invoice_id: savedInvoice.id
+            }]);
+          }
+          
+          this.closeModal();
+          await this.loadItems();
+        } catch (error) {
+          console.error("Save error:", error);
+          alert('Gagal menyimpan invoice.');
+        } finally {
+          this.submitting = false;
+        }
+      },
+
+      async deleteItem(id) {
+        if (!confirm('Hapus invoice ini? (Soft Delete)')) return;
+        
+        try {
+          const { error } = await supabase.from('invoices').update({ is_deleted: true }).eq('id', id);
+          if (error) throw error;
+          await this.loadItems();
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('Gagal menghapus data.');
+        }
+      },
+      
+      previewInvoice(item) {
+        this.previewData = { ...item, items: item.invoice_items || [] };
+        this.previewOpen = true;
+      },
+      
+      closePreview() {
+        this.previewOpen = false;
+      },
+      
+      downloadPDF() {
+        const element = document.getElementById('invoice-pdf-content');
+        const opt = {
+          margin:       0,
+          filename:     `${this.previewData.invoice_number}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        // html2pdf is available globally via CDN in AdminLayout
+        window.html2pdf().set(opt).from(element).save();
+      },
+      
+      sendWhatsApp() {
+        const phone = this.getClientPhone(this.previewData.client_id);
+        if (!phone) {
+          alert('Klien ini tidak memiliki nomor WhatsApp tersimpan.');
+          return;
+        }
+        
+        const cleanPhone = phone.replace(/\D/g, '');
+        const text = `Halo, berikut adalah link/informasi tagihan Anda dengan nomor Invoice *${this.previewData.invoice_number}* sejumlah *${this.formatCurrency(this.previewData.grand_total)}*. \n\nMohon segera memproses pembayaran sebelum *${this.formatDate(this.previewData.due_date)}*. \n\nTerima kasih atas kerjasama Anda.`;
+        const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+      }
+    }));
+  });
+</script>

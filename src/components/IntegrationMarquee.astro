@@ -1,0 +1,173 @@
+---
+const marquee1 = [
+  { name: 'WhatsApp', icon: 'whatsapp' },
+  { name: 'Instagram', icon: 'instagram' },
+  { name: 'Facebook', icon: 'facebook' },
+  { name: 'TikTok', icon: 'tiktok' },
+  { name: 'Google Maps', icon: 'googlemaps' },
+  { name: 'Google Analytics', icon: 'googleanalytics' },
+  { name: 'Google Search Console', icon: 'googlesearchconsole' },
+  { name: 'Meta Pixel', icon: 'meta' },
+  { name: 'Gmail', icon: 'gmail' },
+  { name: 'YouTube', icon: 'youtube' },
+  { name: 'QRIS', textOnly: true },
+  { name: 'Midtrans', textOnly: true },
+  { name: 'Xendit', textOnly: true },
+  { name: 'Google Calendar', icon: 'googlecalendar' },
+  { name: 'Google Business Profile', icon: 'google' }
+];
+
+const marquee2 = [
+  { name: 'Astro', icon: 'astro' },
+  { name: 'Tailwind CSS', icon: 'tailwindcss' },
+  { name: 'JavaScript', icon: 'javascript' },
+  { name: 'TypeScript', icon: 'typescript' },
+  { name: 'Supabase', icon: 'supabase' },
+  { name: 'GitHub', icon: 'github' },
+  { name: 'Vercel', icon: 'vercel' },
+  { name: 'Cloudflare', icon: 'cloudflare' },
+  { name: 'Lighthouse', icon: 'lighthouse' },
+  { name: 'Open Graph', textOnly: true },
+  { name: 'Schema.org', textOnly: true },
+  { name: 'Lucide', icon: 'lucide' }
+];
+---
+
+<section class="w-full bg-white py-10 md:py-14 overflow-hidden border-t border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 lg:mb-20">
+    <h2 class="text-xl md:text-xl lg:text-2xl font-extrabold text-gray-700 tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
+      Terintegrasi Dan Dibangun Menggunakan Teknologi Terpecaya
+    </h2>
+  </div>
+
+  <div class="marquee-wrapper relative flex flex-col gap-6 w-full">
+    <!-- Gradient Mask for visual fade effect -->
+    <div class="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+    <div class="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+
+    <!-- Marquee 1 (Right to Left) -->
+    <div class="flex flex-col relative w-full overflow-visible">
+      <div class="marquee-container marquee-left flex items-center overflow-hidden w-full relative">
+        <div class="marquee-track flex items-center shrink-0">
+          <div class="flex items-center shrink-0">
+            {marquee1.map((item) => (
+              <div class="marquee-item flex items-center justify-center shrink-0 mx-6 md:mx-10">
+                {item.textOnly ? (
+                  <span class="text-xl md:text-2xl font-black tracking-tighter text-gray-400 transition-all duration-300 grayscale opacity-60 hover:opacity-100 hover:text-dark hover:scale-105 select-none">{item.name}</span>
+                ) : (
+                  <div class="flex flex-col items-center gap-2 group cursor-default">
+                    <img src={`https://cdn.simpleicons.org/${item.icon}`} alt={item.name} loading="lazy" class="h-7 sm:h-8 md:h-9 lg:h-10 w-auto opacity-50 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-105 will-change-transform" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <!-- Duplicate for infinite scroll -->
+          <div class="flex items-center shrink-0" aria-hidden="true">
+            {marquee1.map((item) => (
+              <div class="marquee-item flex items-center justify-center shrink-0 mx-6 md:mx-10">
+                {item.textOnly ? (
+                  <span class="text-xl md:text-2xl font-black tracking-tighter text-gray-400 transition-all duration-300 grayscale opacity-60 hover:opacity-100 hover:text-dark hover:scale-105 select-none">{item.name}</span>
+                ) : (
+                  <div class="flex flex-col items-center gap-2 group cursor-default">
+                    <img src={`https://cdn.simpleicons.org/${item.icon}`} alt={item.name} loading="lazy" class="h-7 sm:h-8 md:h-9 lg:h-10 w-auto opacity-50 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-105 will-change-transform" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Marquee 2 (Left to Right) -->
+    <div class="flex flex-col relative mt-2 w-full overflow-visible">
+      <div class="marquee-container marquee-right flex items-center overflow-hidden w-full relative">
+        <div class="marquee-track-right flex items-center shrink-0">
+          <div class="flex items-center shrink-0">
+            {marquee2.map((item) => (
+              <div class="marquee-item flex items-center justify-center shrink-0 mx-6 md:mx-10">
+                {item.textOnly ? (
+                  <span class="text-xl md:text-2xl font-black tracking-tighter text-gray-400 transition-all duration-300 grayscale opacity-60 hover:opacity-100 hover:text-dark hover:scale-105 select-none">{item.name}</span>
+                ) : (
+                  <div class="flex flex-col items-center gap-2 group cursor-default">
+                    <img src={`https://cdn.simpleicons.org/${item.icon}`} alt={item.name} loading="lazy" class="h-7 sm:h-8 md:h-9 lg:h-10 w-auto opacity-50 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-105 will-change-transform" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <!-- Duplicate for infinite scroll -->
+          <div class="flex items-center shrink-0" aria-hidden="true">
+            {marquee2.map((item) => (
+              <div class="marquee-item flex items-center justify-center shrink-0 mx-6 md:mx-10">
+                {item.textOnly ? (
+                  <span class="text-xl md:text-2xl font-black tracking-tighter text-gray-400 transition-all duration-300 grayscale opacity-60 hover:opacity-100 hover:text-dark hover:scale-105 select-none">{item.name}</span>
+                ) : (
+                  <div class="flex flex-col items-center gap-2 group cursor-default">
+                    <img src={`https://cdn.simpleicons.org/${item.icon}`} alt={item.name} loading="lazy" class="h-7 sm:h-8 md:h-9 lg:h-10 w-auto opacity-50 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-105 will-change-transform" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .marquee-track {
+    width: max-content;
+    animation: scroll-left 45s linear infinite;
+    will-change: transform;
+  }
+  
+  .marquee-track-right {
+    width: max-content;
+    animation: scroll-right 50s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-left:hover .marquee-track,
+  .marquee-right:hover .marquee-track-right {
+    animation-play-state: paused;
+  }
+
+  @keyframes scroll-left {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @keyframes scroll-right {
+    from {
+      transform: translate3d(-50%, 0, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track,
+    .marquee-track-right {
+      animation: none !important;
+      transform: none !important;
+    }
+    .marquee-container {
+      overflow-x: auto !important;
+      scroll-behavior: smooth;
+    }
+    .marquee-container > div:nth-child(2) {
+      display: none;
+    }
+    .marquee-wrapper .absolute {
+      display: none;
+    }
+  }
+</style>
