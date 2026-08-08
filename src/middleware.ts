@@ -1,6 +1,11 @@
 import { defineMiddleware } from 'astro:middleware';
 
 export const onRequest = defineMiddleware((context, next) => {
+  // Skip redirect logic for prerendered pages (request.headers not available)
+  if (context.isPrerendered) {
+    return next();
+  }
+
   const url = new URL(context.request.url);
   const forwardedHost = context.request.headers.get('x-forwarded-host');
   const host = forwardedHost || url.hostname;
